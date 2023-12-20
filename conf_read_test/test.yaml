@@ -1,0 +1,14 @@
+appname: test
+
+#数据库定义
+db:
+  name:     test
+  user:     test
+  password: test
+  port:     1234
+
+contacts:
+  - name: i test
+    email: test@test.com
+  - name: i test second
+    email: second@qq.com

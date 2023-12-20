@@ -1,0 +1,12 @@
+.PHONY:all mod help
+all: mod
+
+mod:
+	go mod tidy
+	go mod download
+	go mod vendor
+	go mod verify
+
+help:
+	@echo "make mod - 运行 Go mod"
+	@echo "make help - 查看帮助"

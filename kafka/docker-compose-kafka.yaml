@@ -1,0 +1,57 @@
+version: '3'
+
+# docker network ls
+# docker network create custom_net
+
+volumes:
+  zookeeper:
+  kafka:
+
+networks:
+  custom_net:
+    external: true
+
+services:
+
+  zookeeper:
+     image: 'bitnami/zookeeper:latest'
+     container_name: zookeeper
+     ports:
+       - '2181:2181'
+     environment:
+       - ALLOW_ANONYMOUS_LOGIN=yes
+     networks:
+       custom_net:          # 使用指定的网络 backend, 并且设置网络别名为 test1，
+         aliases:        # 设置网络别名后，可以在其他容器中 ping test1 访问到该容器
+           - zookeeper.liushuojia.com
+
+  kafka:
+     image: 'bitnami/kafka:latest'
+     container_name: kafka
+     ports:
+       - '9092:9092'
+     environment:
+       - KAFKA_BROKER_ID=1
+       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka.liushuojia.com:9092
+       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+       - ALLOW_PLAINTEXT_LISTENER=yes
+     depends_on:
+       - zookeeper
+     networks:
+       custom_net:            # 使用指定的网络 backend, 并且设置网络别名为 test1，
+         aliases:             # 设置网络别名后，可以在其他容器中 ping test1 访问到该容器
+           - kafka.liushuojia.com
+
+  kafka-manager:
+    image: sheepkiller/kafka-manager
+    depends_on: [ kafka ]
+    container_name: kafka-manager
+    ports:
+      - "9000:9000"
+    environment:
+      ZK_HOSTS: zookeeper:2181
+    networks:
+      custom_net:            # 使用指定的网络 backend, 并且设置网络别名为 test1，
+        aliases:             # 设置网络别名后，可以在其他容器中 ping test1 访问到该容器
+          - kafka-manager.liushuojia.com
