@@ -1,4 +1,4 @@
-.PHONY:all mod help
+.PHONY:all mod git help
 all: mod
 
 mod:
