@@ -9,21 +9,29 @@ import (
 )
 
 // 目录下 go test
-func TestHelloWorld(t *testing.T) {
-	t.Log("send email")
+func TestKafka(t *testing.T) {
+	t.Log("test kafka")
 
-	go read()
-	write()
+	n := New().SetBrokers("localhost:9092").SetTopicPrefix("ppp-").SetGroupID("my002")
 
+	go n.Reader("my-topic", 0, func(message kafka.Message) error {
+		fmt.Println(message)
+		return nil
+	})
+	go n.Reader("my-topic-one", 0, func(message kafka.Message) error {
+		fmt.Println(message)
+		return nil
+	})
+	go n.Reader("my-topic-two", 0, func(message kafka.Message) error {
+		fmt.Println(message)
+		return nil
+	})
+
+	//time.Sleep(3 * time.Second)
+	//n.Close()
+
+	//write()
 	time.Sleep(time.Second * 100)
-}
-
-func read() {
-	New().SetBrokers("localhost:9092").SetTopicPrefix("ppp-").SetGroupID("my002").
-		Reader("my-topic", 0, func(message kafka.Message) error {
-			fmt.Println(message)
-			return nil
-		})
 }
 
 func write() {

@@ -5,7 +5,7 @@ import (
 )
 
 // 目录下 go test
-func TestHelloWorld(t *testing.T) {
+func TestEmail(t *testing.T) {
 	t.Log("send email")
 
 	New().

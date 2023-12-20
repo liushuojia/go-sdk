@@ -44,7 +44,6 @@ func (c *Conn) SetContext(ctx context.Context) *Conn {
 	return c
 }
 func (c *Conn) Close() {
-	c.ctx.Done()
 	c.cancel()
 }
 func (c *Conn) Reader(topic string, partition int, cb Callback) {
