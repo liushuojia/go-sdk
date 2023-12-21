@@ -7,6 +7,7 @@ require (
 	github.com/jinzhu/configor v1.2.2
 	github.com/redis/go-redis/v9 v9.3.1
 	github.com/segmentio/kafka-go v0.4.47
+	github.com/streadway/amqp v1.1.0
 	golang.org/x/image v0.14.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )

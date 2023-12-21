@@ -14,6 +14,8 @@ func TestRedis(t *testing.T) {
 
 	r := New().SetAddr("127.0.0.1:6379").SetPassword("liushuojia").Connect()
 
+	r.Set(r.ctx, "a", "nihao", time.Second*100).Err()
+
 	go r.Reader(
 		func(message *redis.Message) {
 			fmt.Println(message)
