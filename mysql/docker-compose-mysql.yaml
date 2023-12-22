@@ -1,0 +1,13 @@
+version: '3'
+services:
+  mysql:
+    image: 'mysql:5.7'
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: liushuojia
+      TZ: Asia/Shanghai
+      LANG: C.UTF-8
+    volumes:
+      - './mysql/my.cnf:/etc/mysql/my.cnf:cached'
+    ports:
+      - '3306:3306'

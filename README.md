@@ -11,3 +11,7 @@
 ## redis
     库 github.com/redis/go-redis/v9
     官网 https://redis.uptrace.dev/guide/
+
+## mysql
+    使用 gorm 库， cmd/gen.go 生成model和query
+    官网 https://gorm.io/zh_CN/docs/
