@@ -181,6 +181,10 @@ func (q *Query) RangeTime(f field.Time, n string) *Query {
 	return q
 }
 
+/*
+Build
+or的方式比较特殊需要实体化的query，暂放弃
+*/
 func (q *Query) Build() []gen.Condition {
 	var conditionList []gen.Condition
 	if len(q.Where) > 0 {

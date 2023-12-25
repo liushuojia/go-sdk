@@ -23,9 +23,9 @@ func New() *Conn {
 type Callback func(channel, message string)
 
 type Conn struct {
-	Addr     string
-	Password string
-	DB       int
+	addr     string
+	password string
+	db       int
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -35,9 +35,9 @@ type Conn struct {
 func (c *Conn) Connect() *Conn {
 	c.Client = redis.NewClient(
 		&redis.Options{
-			Addr:     c.Addr,
-			Password: c.Password,
-			DB:       c.DB,
+			Addr:     c.addr,
+			Password: c.password,
+			DB:       c.db,
 
 			PoolSize:     poolSize,     // 连接池最大socket连接数，默认为5倍CPU数， 5 * runtime.NumCPU
 			MinIdleConns: minIdleConns, //在启动阶段创建指定数量的Idle连接，并长期维持idle状态的连接数不少于指定数量；。
@@ -70,20 +70,24 @@ func (c *Conn) Close() {
 }
 
 func (c *Conn) SetAddr(addr string) *Conn {
-	c.Addr = addr
+	c.addr = addr
 	return c
 }
 func (c *Conn) SetPassword(password string) *Conn {
-	c.Password = password
+	c.password = password
 	return c
 }
 func (c *Conn) SetDB(db int) *Conn {
-	c.DB = db
+	c.db = db
 	return c
 }
 func (c *Conn) SetContext(ctx context.Context) *Conn {
 	c.ctx, c.cancel = context.WithCancel(ctx)
 	return c
+}
+
+func (c *Conn) GetRedis() *redis.Client {
+	return c.Client
 }
 
 func (c *Conn) Reader(cb Callback, topicList ...string) {

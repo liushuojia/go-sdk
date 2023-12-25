@@ -12,8 +12,8 @@ func NewCluster() *ConnCluster {
 }
 
 type ConnCluster struct {
-	Addrs    []string
-	Password string
+	addrs    []string
+	password string
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -23,8 +23,8 @@ type ConnCluster struct {
 func (c *ConnCluster) Connect() *ConnCluster {
 	c.ClusterClient = redis.NewClusterClient(
 		&redis.ClusterOptions{
-			Addrs:    c.Addrs,
-			Password: c.Password,
+			Addrs:    c.addrs,
+			Password: c.password,
 
 			PoolSize:     poolSize,     // 连接池最大socket连接数，默认为5倍CPU数， 5 * runtime.NumCPU
 			MinIdleConns: minIdleConns, //在启动阶段创建指定数量的Idle连接，并长期维持idle状态的连接数不少于指定数量；。
@@ -57,16 +57,20 @@ func (c *ConnCluster) Close() {
 }
 
 func (c *ConnCluster) SetAddr(addrs ...string) *ConnCluster {
-	c.Addrs = addrs
+	c.addrs = addrs
 	return c
 }
 func (c *ConnCluster) SetPassword(password string) *ConnCluster {
-	c.Password = password
+	c.password = password
 	return c
 }
 func (c *ConnCluster) SetContext(ctx context.Context) *ConnCluster {
 	c.ctx, c.cancel = context.WithCancel(ctx)
 	return c
+}
+
+func (c *ConnCluster) GetRedis() *redis.ClusterClient {
+	return c.ClusterClient
 }
 
 func (c *ConnCluster) Reader(cb Callback, topicList ...string) {

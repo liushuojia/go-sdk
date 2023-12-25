@@ -15,3 +15,10 @@
 ## mysql
     使用 gorm 库， cmd/gen.go 生成model和query
     官网 https://gorm.io/zh_CN/docs/
+
+## mqtt
+    库 github.com/eclipse/paho.mqtt.golang
+    官网 https://www.emqx.com/zh/blog/how-to-use-mqtt-in-golang
+    客户端账号需在封装库外管理
+
+
