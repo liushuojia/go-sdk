@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/liushuojia/go-sdk/example/model"
+	"github.com/liushuojia/go-sdk/example/query"
+	mysqlConn "github.com/liushuojia/go-sdk/mysql"
 	"log"
-	"sdk/example/model"
-	"sdk/example/query"
-	mysqlConn "sdk/mysql"
 )
 
 var (

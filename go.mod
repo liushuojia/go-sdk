@@ -1,4 +1,4 @@
-module sdk
+module github.com/liushuojia/go-sdk
 
 go 1.21.5
 

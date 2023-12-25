@@ -2,12 +2,12 @@ package main
 
 import (
 	"flag"
+	"github.com/liushuojia/go-sdk.git/mysql"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gen"
 	"gorm.io/gorm"
 	"os"
 	"path/filepath"
-	"sdk/mysql"
 )
 
 type CommonMethod struct {
