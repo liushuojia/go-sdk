@@ -34,7 +34,7 @@ var (
 	out      = flag.String("out", "/Volumes/work/app-aliyun/sdk/example/gen", "-out outPath")
 )
 
-func build() {
+func Build() {
 	// go run gen.go -c ../app.ini
 	gormDB, err := GormDB(
 		*username,
