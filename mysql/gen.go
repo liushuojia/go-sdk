@@ -1,7 +1,6 @@
 package mysqlConn
 
 import (
-	"flag"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gen"
 	"gorm.io/gorm"
@@ -25,29 +24,29 @@ type Querier interface {
 	Get(id int64) (*gen.T, error) // GetByID query data by id and return it as *struct*
 }
 
-var (
-	username = flag.String("u", "root", "-u username")
-	password = flag.String("p", "liushuojia", "-p password")
-	host     = flag.String("h", "127.0.0.1", "-h host")
-	port     = flag.Int("P", 3306, "-P port")
-	db       = flag.String("db", "my_test", "-db database")
-	out      = flag.String("out", "/Volumes/work/app-aliyun/sdk/example/gen", "-out outPath")
-)
+//var (
+//	username = flag.String("u", "root", "-u username")
+//	password = flag.String("p", "liushuojia", "-p password")
+//	host     = flag.String("h", "127.0.0.1", "-h host")
+//	port     = flag.Int("P", 3306, "-P port")
+//	db       = flag.String("db", "my_test", "-db database")
+//	out      = flag.String("out", "/Volumes/work/app-aliyun/sdk/example/gen", "-out outPath")
+//)
 
-func Build() {
+func Build(username, password, host string, port int, db, out string) {
 	// go run gen.go -c ../app.ini
 	gormDB, err := GormDB(
-		*username,
-		*password,
-		*host,
-		*port,
-		*db,
+		username,
+		password,
+		host,
+		port,
+		db,
 	)
 	if err != nil {
 		log.Fatalln("connect fail", err)
 	}
 
-	basePath, err := filepath.Abs(filepath.Dir(*out))
+	basePath, err := filepath.Abs(filepath.Dir(out))
 	if err != nil {
 		log.Fatalln("our path fail", err)
 	}
