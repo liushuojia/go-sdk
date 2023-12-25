@@ -1,8 +1,7 @@
-package main
+package mysqlConn
 
 import (
 	"flag"
-	"github.com/liushuojia/go-sdk.git/mysql"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gen"
 	"gorm.io/gorm"
@@ -35,9 +34,9 @@ var (
 	out      = flag.String("out", "/Volumes/work/app-aliyun/sdk/example/gen", "-out outPath")
 )
 
-func main() {
+func build() {
 	// go run gen.go -c ../app.ini
-	gormDB, err := mysqlConn.GormDB(
+	gormDB, err := GormDB(
 		*username,
 		*password,
 		*host,
