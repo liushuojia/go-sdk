@@ -1,0 +1,17 @@
+version: '3'
+services:
+
+  emqx:
+    image: 'emqx/emqx:5.3.2'
+#    environment:
+#      RABBITMQ_DEFAULT_USER: admin
+#      RABBITMQ_DEFAULT_PASS: admin
+    container_name: emqx
+    ports:
+      - '1883:1883'
+      - '8083:8083'
+      - '8084:8084'
+      - '8883:8883'
+      - '18083:18083'
+
+

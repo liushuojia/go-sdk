@@ -20,7 +20,8 @@ func New() *Conn {
 	return (&Conn{}).SetContext(context.Background())
 }
 
-type Callback func(message amqp.Delivery) error
+// type Callback func(message amqp.Delivery) error
+type Callback func(exchange, routingKey string, body []byte) error
 
 type Conn struct {
 	connection    *amqp.Connection
@@ -43,6 +44,12 @@ func (r *Conn) Connect() error {
 	go r.connectLoop()
 	return nil
 }
+func (r *Conn) Close() {
+	r.cancel()
+	if r.isConnected {
+		r.closeConnect()
+	}
+}
 
 // SetContext 该函数必须在Connect前使用， 否则可能存在重连问题
 func (r *Conn) SetContext(ctx context.Context) *Conn {
@@ -56,12 +63,7 @@ func (r *Conn) SetUrl(user, password, host string, port int, vhost string) *Conn
 	)
 	return r
 }
-func (r *Conn) Close() {
-	r.cancel()
-	if r.isConnected {
-		r.closeConnect()
-	}
-}
+
 func (r *Conn) closeConnect() {
 	if r.channel != nil {
 		r.channel.Close()
@@ -323,7 +325,7 @@ START:
 			if !msgIsOpen {
 				break
 			}
-			if err := callback(d); err == nil {
+			if err := callback(d.Exchange, d.RoutingKey, d.Body); err == nil {
 				d.Ack(true)
 			}
 		case <-r.ctx.Done():
@@ -364,7 +366,7 @@ START:
 			if !msgIsOpen {
 				break
 			}
-			if err := callback(d); err == nil {
+			if err := callback(d.Exchange, d.RoutingKey, d.Body); err == nil {
 				d.Ack(true)
 			}
 		case <-r.ctx.Done():

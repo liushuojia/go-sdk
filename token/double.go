@@ -1,4 +1,4 @@
-package token
+package tokenConn
 
 import (
 	"github.com/twinj/uuid"

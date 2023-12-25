@@ -1,8 +1,8 @@
 package kafkaConn
 
 import (
-	"fmt"
 	"github.com/segmentio/kafka-go"
+	"log"
 	"strconv"
 	"testing"
 	"time"
@@ -14,16 +14,34 @@ func TestKafka(t *testing.T) {
 
 	n := New().SetBrokers("localhost:9092").SetTopicPrefix("ppp-").SetGroupID("my002")
 
-	go n.Reader("my-topic", 0, func(message kafka.Message) error {
-		fmt.Println(message)
+	go n.Reader("my-topic", 0, func(topic string, key, value []byte) error {
+		log.Println(
+			"[subscribe]",
+			"reader",
+			"topic:", topic,
+			"Key:", string(key),
+			"value:", string(value),
+		)
 		return nil
 	})
-	go n.Reader("my-topic-one", 0, func(message kafka.Message) error {
-		fmt.Println(message)
+	go n.Reader("my-topic-one", 0, func(topic string, key, value []byte) error {
+		log.Println(
+			"[subscribe]",
+			"reader",
+			"topic:", topic,
+			"Key:", string(key),
+			"value:", string(value),
+		)
 		return nil
 	})
-	go n.Reader("my-topic-two", 0, func(message kafka.Message) error {
-		fmt.Println(message)
+	go n.Reader("my-topic-two", 0, func(topic string, key, value []byte) error {
+		log.Println(
+			"[subscribe]",
+			"reader",
+			"topic:", topic,
+			"Key:", string(key),
+			"value:", string(value),
+		)
 		return nil
 	})
 

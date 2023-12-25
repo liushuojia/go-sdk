@@ -31,8 +31,12 @@ func TestRabbitMQConn(t *testing.T) {
 	//c.SubscribeExchange("my-topic", amqp.ExchangeTopic, "aa")
 
 	go c.SubscribeExchange(
-		func(message amqp.Delivery) error {
-			fmt.Println(message)
+		func(exchange, routingKey string, body []byte) error {
+			fmt.Println(
+				"exchange:", exchange,
+				"routingKey:", routingKey,
+				"body:", string(body),
+			)
 			return nil
 		},
 		"my-topic",
@@ -49,8 +53,12 @@ func TestRabbitMQConn(t *testing.T) {
 	//}()
 
 	go c.SubscribeQueue(
-		func(message amqp.Delivery) error {
-			fmt.Println(message)
+		func(exchange, routingKey string, body []byte) error {
+			fmt.Println(
+				"exchange:", exchange,
+				"routingKey:", routingKey,
+				"body:", string(body),
+			)
 			return nil
 		},
 		"my-queue",

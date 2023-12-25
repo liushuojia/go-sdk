@@ -1,3 +1,6 @@
+CREATE DATABASE `my_test`;
+
+use my_test;
 CREATE TABLE `user` (
   `id` bigint(11) unsigned NOT NULL AUTO_INCREMENT,
   `created_at` timestamp NULL DEFAULT NULL,

@@ -2,7 +2,6 @@ package redisConn
 
 import (
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"strconv"
 	"testing"
 	"time"
@@ -15,8 +14,8 @@ func TestRedisCluster(t *testing.T) {
 	r := NewCluster().SetAddr(":7001").Connect()
 
 	go r.Reader(
-		func(message *redis.Message) {
-			fmt.Println(message)
+		func(channel, message string) {
+			fmt.Println("channel:", channel, "message:", message)
 		},
 		"cluster-topic",
 		"cluster-topic2",

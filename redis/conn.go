@@ -16,7 +16,11 @@ func New() *Conn {
 	return (&Conn{}).SetContext(context.Background())
 }
 
-type Callback func(message *redis.Message)
+//
+// type Callback func(message *redis.Message)
+
+// Callback 使用string方便其他包快速使用
+type Callback func(channel, message string)
 
 type Conn struct {
 	Addr     string
@@ -77,7 +81,6 @@ func (c *Conn) SetDB(db int) *Conn {
 	c.DB = db
 	return c
 }
-
 func (c *Conn) SetContext(ctx context.Context) *Conn {
 	c.ctx, c.cancel = context.WithCancel(ctx)
 	return c
@@ -94,7 +97,8 @@ func (c *Conn) Reader(cb Callback, topicList ...string) {
 		case message := <-pub.Channel():
 			if message != nil {
 				log.Println("[subscribe]", "channel:", message.Channel, "payload", message.Payload)
-				cb(message)
+				//cb(message)
+				cb(message.Channel, message.Payload)
 			}
 		case <-c.ctx.Done():
 			goto END
@@ -102,3 +106,5 @@ func (c *Conn) Reader(cb Callback, topicList ...string) {
 	}
 END:
 }
+
+// r.Publish(r.ctx, "topic", "topic a "+strconv.Itoa(i))

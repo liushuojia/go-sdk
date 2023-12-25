@@ -17,7 +17,7 @@ func New() *Conn {
 	return (&Conn{}).SetContext(context.Background())
 }
 
-type Callback func(message kafka.Message) error
+type Callback func(topic string, key, value []byte) error
 type Conn struct {
 	brokers     []string
 	topicPrefix string
@@ -97,7 +97,7 @@ func (c *Conn) Reader(topic string, partition int, cb Callback) {
 			"Key:", string(message.Key),
 			"value:", string(message.Value),
 		)
-		if err := cb(message); err == nil {
+		if err := cb(message.Topic, message.Key, message.Value); err == nil {
 			if err := r.CommitMessages(c.ctx, message); err != nil {
 				log.Println(
 					"[subscribe]",

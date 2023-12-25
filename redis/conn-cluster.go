@@ -80,7 +80,8 @@ func (c *ConnCluster) Reader(cb Callback, topicList ...string) {
 		case message := <-pub.Channel():
 			if message != nil {
 				log.Println("[subscribe]", "channel:", message.Channel, "payload", message.Payload)
-				cb(message)
+				//cb(message)
+				cb(message.Channel, message.Payload)
 			}
 		case <-c.ctx.Done():
 			goto END

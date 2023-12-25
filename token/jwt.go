@@ -1,4 +1,4 @@
-package token
+package tokenConn
 
 import (
 	"encoding/base64"
@@ -128,13 +128,17 @@ func (j *JWT) Parse(token string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return j.jwtSecret, nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
+		claims, ok := tokenClaims.Claims.(*Claims)
+		if ok && tokenClaims.Valid {
 			return claims, nil
 		}
 	}
-	return nil, err
+	return nil, errors.New("数据为空")
 }
 
 // GetPayload 获取token主体信息, 不验证加token是否有效

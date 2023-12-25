@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"log"
@@ -11,22 +12,26 @@ import (
 	"sdk/example/query"
 	GIN "sdk/gin"
 	mysqlConn "sdk/mysql"
+	tokenConn "sdk/token"
+	websocketConn "sdk/websocket"
+	"strconv"
+	"time"
 )
 
 func main() {
 
-	conn, err := mysqlConn.GormDB("root", "liushuojia", "127.0.0.1", 3306, "my_test")
+	gormDB, err := mysqlConn.GormDB("root", "liushuojia", "127.0.0.1", 3306, "my_test")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	query.SetDefault(conn)
+	query.SetDefault(gormDB)
 
-	router := gin.New()
+	router := gin.Default()
 
 	// 全局中间件
-	router.Use(gin.Recovery())
+	//router.Use(gin.Recovery())
 
-	router.Use(Auth())
+	//router.Use(Auth())
 
 	// 404
 	router.NoRoute(func(c *gin.Context) {
@@ -49,8 +54,34 @@ func main() {
 		c.String(http.StatusOK, "PONG")
 	})
 
+	t := router.Group("token")
+	{
+		token := tokenConn.New()
+		t.GET("", func(c *gin.Context) {
+			t, err := token.SetID(100).Generate()
+			if err != nil {
+				c.JSON(http.StatusBadRequest, err)
+				return
+			}
+			c.String(http.StatusOK, t)
+		})
+		t.POST("", func(c *gin.Context) {
+			body, err := GIN.Body(c)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, err)
+				return
+			}
+			claims, err := token.Parse(string(body))
+			if err != nil {
+				c.JSON(http.StatusBadRequest, err)
+				return
+			}
+			c.JSON(http.StatusOK, claims)
+		})
+	}
+
 	//u := router.Group("user",Auth())
-	u := router.Group("user")
+	u := router.Group("user", Auth())
 	{
 		u.GET("", func(c *gin.Context) {
 			user := query.User
@@ -189,6 +220,40 @@ func main() {
 		})
 	}
 
+	ws := router.Group("ws", Auth())
+	{
+		ws.GET("test", func(c *gin.Context) {
+			conn, id, err := websocketConn.Init(c)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, err)
+				return
+			}
+			defer websocketConn.Close(id)
+			defer conn.Close()
+
+			go func() {
+				for i := 0; i < 10; i++ {
+					time.Sleep(2 * time.Second)
+					websocketConn.Message(id, []byte("hi "+strconv.Itoa(i)))
+				}
+			}()
+
+			for {
+				data, err := conn.Read()
+				if err != nil {
+					break
+				}
+				if data == nil || len(data) <= 0 {
+					continue
+				}
+
+				fmt.Println(string(data))
+				if err := conn.Write(data); err != nil {
+					break
+				}
+			}
+		})
+	}
 	router.Run(":8080")
 }
 

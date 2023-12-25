@@ -2,7 +2,6 @@ package redisConn
 
 import (
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"strconv"
 	"testing"
 	"time"
@@ -17,8 +16,8 @@ func TestRedis(t *testing.T) {
 	r.Set(r.ctx, "a", "nihao", time.Second*100).Err()
 
 	go r.Reader(
-		func(message *redis.Message) {
-			fmt.Println(message)
+		func(channel, message string) {
+			fmt.Println("channel:", channel, "message:", message)
 		},
 		"topic",
 		"topic2",
