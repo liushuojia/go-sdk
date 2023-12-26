@@ -29,11 +29,12 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	tableName := _user.userDo.TableName()
 	_user.ALL = field.NewAsterisk(tableName)
 	_user.ID = field.NewInt64(tableName, "id")
-	_user.CreatedAt = field.NewTime(tableName, "created_at")
-	_user.UpdatedAt = field.NewTime(tableName, "updated_at")
-	_user.DeletedAt = field.NewField(tableName, "deleted_at")
 	_user.Name = field.NewString(tableName, "name")
-	_user.Addr = field.NewString(tableName, "addr")
+	_user.Age = field.NewInt64(tableName, "age")
+	_user.Balance = field.NewFloat64(tableName, "balance")
+	_user.UpdatedAt = field.NewTime(tableName, "updated_at")
+	_user.CreatedAt = field.NewTime(tableName, "created_at")
+	_user.DeletedAt = field.NewField(tableName, "deleted_at")
 
 	_user.fillFieldMap()
 
@@ -44,12 +45,13 @@ type user struct {
 	userDo
 
 	ALL       field.Asterisk
-	ID        field.Int64
-	CreatedAt field.Time
-	UpdatedAt field.Time
-	DeletedAt field.Field
-	Name      field.String
-	Addr      field.String
+	ID        field.Int64   // ID
+	Name      field.String  // 用户名
+	Age       field.Int64   // 年龄
+	Balance   field.Float64 // 余额
+	UpdatedAt field.Time    // 更新时间
+	CreatedAt field.Time    // 创建时间
+	DeletedAt field.Field   // 删除时间
 
 	fieldMap map[string]field.Expr
 }
@@ -67,11 +69,12 @@ func (u user) As(alias string) *user {
 func (u *user) updateTableName(table string) *user {
 	u.ALL = field.NewAsterisk(table)
 	u.ID = field.NewInt64(table, "id")
-	u.CreatedAt = field.NewTime(table, "created_at")
-	u.UpdatedAt = field.NewTime(table, "updated_at")
-	u.DeletedAt = field.NewField(table, "deleted_at")
 	u.Name = field.NewString(table, "name")
-	u.Addr = field.NewString(table, "addr")
+	u.Age = field.NewInt64(table, "age")
+	u.Balance = field.NewFloat64(table, "balance")
+	u.UpdatedAt = field.NewTime(table, "updated_at")
+	u.CreatedAt = field.NewTime(table, "created_at")
+	u.DeletedAt = field.NewField(table, "deleted_at")
 
 	u.fillFieldMap()
 
@@ -88,13 +91,14 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 6)
+	u.fieldMap = make(map[string]field.Expr, 7)
 	u.fieldMap["id"] = u.ID
-	u.fieldMap["created_at"] = u.CreatedAt
-	u.fieldMap["updated_at"] = u.UpdatedAt
-	u.fieldMap["deleted_at"] = u.DeletedAt
 	u.fieldMap["name"] = u.Name
-	u.fieldMap["addr"] = u.Addr
+	u.fieldMap["age"] = u.Age
+	u.fieldMap["balance"] = u.Balance
+	u.fieldMap["updated_at"] = u.UpdatedAt
+	u.fieldMap["created_at"] = u.CreatedAt
+	u.fieldMap["deleted_at"] = u.DeletedAt
 }
 
 func (u user) clone(db *gorm.DB) user {
@@ -166,6 +170,10 @@ func (u userDo) Select(conds ...field.Expr) *userDo {
 
 func (u userDo) Where(conds ...gen.Condition) *userDo {
 	return u.withDO(u.DO.Where(conds...))
+}
+
+func (u userDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *userDo {
+	return u.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
 }
 
 func (u userDo) Order(conds ...field.Expr) *userDo {

@@ -141,7 +141,7 @@ func (j *JWT) Parse(token string) (*Claims, error) {
 	return nil, errors.New("数据为空")
 }
 
-// GetPayload 获取token主体信息, 不验证加token是否有效
+// Payload 获取token主体信息, 不验证加token是否有效
 func (j *JWT) Payload(token string) (claims *Claims, err error) {
 	if token == "" {
 		err = errors.New("token为空")

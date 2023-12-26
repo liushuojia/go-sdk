@@ -192,7 +192,7 @@ func (q *Query) Build() []gen.Condition {
 	}
 	//if len(q.Or) > 0 {
 	//	for _, v := range q.Or {
-	//		tmpDo := o.WithContext(context.Background())
+	//		tmpDo := gen.Cond()
 	//		if len(v) > 0 {
 	//			for _, vq := range v {
 	//				tmpDo = tmpDo.Or(vq)

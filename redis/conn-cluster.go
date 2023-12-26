@@ -77,7 +77,7 @@ func (c *ConnCluster) Reader(cb Callback, topicList ...string) {
 	// There is no error because go-redis automatically reconnects on error.
 	pub := c.Subscribe(c.ctx, topicList...)
 	defer pub.Close()
-	log.Println("[subscribe]", "topic:", topicList)
+	log.Println("[subscribe]", "topic:", topicList, "start")
 
 	for {
 		select {
@@ -92,4 +92,5 @@ func (c *ConnCluster) Reader(cb Callback, topicList ...string) {
 		}
 	}
 END:
+	log.Println("[subscribe]", "topic:", topicList, "end")
 }

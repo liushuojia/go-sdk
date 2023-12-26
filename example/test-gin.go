@@ -88,7 +88,7 @@ func main() {
 			q := GIN.New().Gin(c).
 				Eq(user.Name, "name").
 				EqInt64(user.ID, "id").
-				LikeArray(user.Addr, "addr")
+				LikeArray(user.Name, "name")
 
 			userList, totalSize, err := user.Where(q.Build()...).FindByPage((q.Page-1)*q.PageSize, q.PageSize)
 

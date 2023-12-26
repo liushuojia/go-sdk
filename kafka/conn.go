@@ -63,6 +63,7 @@ func (c *Conn) Reader(topic string, partition int, cb Callback) {
 		"[subscribe]",
 		"topic:", topic,
 		"partition:", partition,
+		"start",
 	)
 
 	for {
@@ -109,6 +110,12 @@ func (c *Conn) Reader(topic string, partition int, cb Callback) {
 			}
 		}
 	}
+	log.Println(
+		"[subscribe]",
+		"topic:", topic,
+		"partition:", partition,
+		"end",
+	)
 }
 func (c *Conn) Writer(topic string, messageList ...kafka.Message) error {
 	w := &kafka.Writer{

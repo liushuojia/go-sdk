@@ -20,7 +20,7 @@ func New() *Conn {
 // type Callback func(message *redis.Message)
 
 // Callback 使用string方便其他包快速使用
-type Callback func(channel, message string)
+type Callback func(channel, message string) error
 
 type Conn struct {
 	addr     string
@@ -63,6 +63,7 @@ func (c *Conn) Connect() *Conn {
 			},
 		},
 	)
+
 	return c
 }
 func (c *Conn) Close() {
@@ -94,7 +95,7 @@ func (c *Conn) Reader(cb Callback, topicList ...string) {
 	// There is no error because go-redis automatically reconnects on error.
 	pub := c.Subscribe(c.ctx, topicList...)
 	defer pub.Close()
-	log.Println("[subscribe]", "topic:", topicList)
+	log.Println("[subscribe]", "topic:", topicList, "start")
 
 	for {
 		select {
@@ -109,6 +110,7 @@ func (c *Conn) Reader(cb Callback, topicList ...string) {
 		}
 	}
 END:
+	log.Println("[subscribe]", "topic:", topicList, "end")
 }
 
 // r.Publish(r.ctx, "topic", "topic a "+strconv.Itoa(i))

@@ -14,12 +14,13 @@ const TableNameUser = "user"
 
 // User mapped from table <user>
 type User struct {
-	ID        int64          `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	CreatedAt time.Time      `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt time.Time      `gorm:"column:updated_at" json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
-	Name      string         `gorm:"column:name;not null" json:"name"`
-	Addr      string         `gorm:"column:addr;not null" json:"addr"`
+	ID        int64          `gorm:"column:id;primaryKey;autoIncrement:true;comment:ID" json:"id"`
+	Name      string         `gorm:"column:name;not null;comment:用户名" json:"name"`
+	Age       int64          `gorm:"column:age;not null;comment:年龄" json:"age"`
+	Balance   float64        `gorm:"column:balance;not null;default:0.00;comment:余额" json:"balance"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`
+	CreatedAt time.Time      `gorm:"column:created_at;not null;comment:创建时间" json:"created_at"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;comment:删除时间" json:"deleted_at"`
 }
 
 func (m *User) IsEmpty() bool {

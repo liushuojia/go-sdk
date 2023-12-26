@@ -49,3 +49,8 @@ func GormDB(username, password, host string, port int, database string) (*gorm.D
 	db.SetConnMaxIdleTime(time.Hour)
 	return conn, nil
 }
+func Close(db *gorm.DB) {
+	if db, err := db.DB(); err == nil && db.Ping() == nil {
+		db.Close()
+	}
+}
