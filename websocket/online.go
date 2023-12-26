@@ -3,7 +3,7 @@ package websocketConn
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 	"sync"
 )
 
@@ -28,12 +28,12 @@ func Init(c *gin.Context) (*Conn, string, error) {
 		return nil, "", err
 	}
 
-	id := uuid.NewV4().String()
+	id := uuid.New().String()
 	for i := 0; i < 100; i++ {
 		if _, ok := onlineMap.Load(id); !ok {
 			break
 		}
-		id = uuid.NewV4().String()
+		id = uuid.New().String()
 	}
 	if id == "" {
 		return nil, "", errors.New("生成唯一id失败")

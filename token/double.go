@@ -1,7 +1,7 @@
 package tokenConn
 
 import (
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -30,11 +30,11 @@ func (d *Double) GetRefresh() *JWT {
 }
 func (d *Double) Generate() (accessToken string, refreshToken string, expire time.Time, err error) {
 	if d.GetAccess().GetUUID() == "" {
-		d.GetAccess().SetUUID(uuid.NewV4().String())
+		d.GetAccess().SetUUID(uuid.New().String())
 	}
 
 	if d.GetRefresh().GetUUID() == "" {
-		d.GetRefresh().SetUUID(uuid.NewV4().String())
+		d.GetRefresh().SetUUID(uuid.New().String())
 	}
 	d.GetRefresh().SetParentUUID(d.GetAccess().GetUUID())
 

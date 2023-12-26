@@ -2,11 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"github.com/liushuojia/go-sdk/example/model"
-	"github.com/liushuojia/go-sdk/example/query"
 	mysqlConn "github.com/liushuojia/go-sdk/mysql"
-	"log"
 )
 
 var (
@@ -18,34 +14,5 @@ var (
 )
 
 func main() {
-
-	conn, err := mysqlConn.GormDB(*username, *password, *host, *port, *db)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	query.SetDefault(conn)
-
-	user := query.User
-	userCreate := model.User{
-		Name: "张三",
-		Addr: "深圳",
-	}
-	user2Create := model.User{
-		Name: "李四",
-		Addr: "广州",
-	}
-
-	fmt.Println(user.Create(&userCreate, &user2Create))
-	fmt.Println(userCreate)
-	fmt.Println(user2Create)
-
-	fmt.Println(user.Where(user.ID.Eq(userCreate.ID)).UpdateSimple(
-		user.Name.Value("深圳市1"),
-		user.Addr.Value("深圳市2"),
-	))
-
-	fmt.Println(user.Find())
-
-	fmt.Println(user.Where(user.ID.Eq(userCreate.ID)).Delete())
-
+	mysqlConn.Build(*username, *password, *host, *port, *db, "/Volumes/work/app-aliyun/sdk/example/query")
 }

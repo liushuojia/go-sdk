@@ -17,7 +17,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"sdk/example/model"
+	"github.com/liushuojia/go-sdk/example/model"
 )
 
 func newUser(db *gorm.DB, opts ...gen.DOOption) user {

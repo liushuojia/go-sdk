@@ -22,6 +22,13 @@ type User struct {
 	Addr      string         `gorm:"column:addr;not null" json:"addr"`
 }
 
+func (m *User) IsEmpty() bool {
+	if m == nil {
+		return true
+	}
+	return m.ID == 0
+}
+
 // TableName User's table name
 func (*User) TableName() string {
 	return TableNameUser

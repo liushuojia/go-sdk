@@ -19,7 +19,6 @@ import (
 )
 
 func main() {
-
 	gormDB, err := mysqlConn.GormDB("root", "liushuojia", "127.0.0.1", 3306, "my_test")
 	if err != nil {
 		log.Fatalln(err)
