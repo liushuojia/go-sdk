@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"sync"
 )
@@ -25,15 +26,16 @@ func New() *Online {
 
 type Online struct {
 	idKey   string // 在线用户ID集合
-	id2uuid string // 某一个用户ID的所有uuid
-	uuid2id string // 对象中uuid对应的在线用户id
+	id2uuid string // 某一个用户ID的所有在线uuid
+	uuid2id string // 在线uuid对应的在线用户id
 	prefix  string
 
 	kind          string
 	client        *redis.Client
 	clusterClient *redis.ClusterClient
 
-	onlineMap sync.Map
+	onlineMap   sync.Map
+	key2uuidMap sync.Map
 }
 
 func (o *Online) SetClusterClient(r *redis.ClusterClient) *Online {
@@ -65,9 +67,7 @@ func (o *Online) SetUuid2id(uuid2id string) *Online {
 
 func (o *Online) Create(id string, uuid string) error {
 	idKey, id2uuid, uuid2id := o.prefix+o.idKey, o.prefix+o.id2uuid+":"+id, o.prefix+o.uuid2id
-
 	//var rr redis.Client | redis.ClusterClient
-
 	ctx := context.Background()
 	switch o.kind {
 	case "ClusterClient":
@@ -176,18 +176,18 @@ func (o *Online) GetAllID() ([]string, error) {
 	}
 	return nil, errors.New("redis 未设置")
 }
-func (o *Online) GetIDByUUID(id string) (string, error) {
+func (o *Online) GetIDByUUID(uuid string) (string, error) {
 	uuid2id := o.prefix + o.uuid2id
 
 	ctx := context.Background()
 	switch o.kind {
 	case "ClusterClient":
 		if r := o.clusterClient; r != nil || r.Ping(ctx).Err() == nil {
-			return r.HGet(ctx, uuid2id, id).Result()
+			return r.HGet(ctx, uuid2id, uuid).Result()
 		}
 	case "Client":
 		if r := o.client; r != nil || r.Ping(ctx).Err() == nil {
-			return r.HGet(ctx, uuid2id, id).Result()
+			return r.HGet(ctx, uuid2id, uuid).Result()
 		}
 	}
 	return "", errors.New("redis 未设置")
@@ -227,20 +227,27 @@ func (o *Online) SendMessageByUUID(uuid string, message []byte) error {
 	return err
 }
 
-// 长连接操作
-
-func (o *Online) Init(c *gin.Context, key string) (*Conn, error) {
+// Init 长连接操作 长连接的uuid与用户的uuid不一样
+func (o *Online) Init(c *gin.Context) (*Conn, string, error) {
 	conn, err := NewByGin(c)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	if _, ok := o.onlineMap.Load(key); ok {
-		return nil, errors.New("唯一id已存在")
+	key := ""
+	for i := 0; i <= 100; i++ {
+		keyTmp := uuid.New().String()
+		if _, ok := o.onlineMap.Load(keyTmp); !ok {
+			key = keyTmp
+			break
+		}
+	}
+	if key == "" {
+		return nil, "", errors.New("唯一id已存在")
 	}
 
 	o.onlineMap.Store(key, conn)
-	return conn, nil
+	return conn, key, nil
 }
 func (o *Online) GetConn(key string) (*Conn, error) {
 	conn, ok := o.onlineMap.Load(key)
@@ -287,4 +294,23 @@ func (o *Online) CloseConn(key string) {
 	if conn, ok := value.(Conn); ok {
 		conn.Close()
 	}
+}
+
+func (o *Online) SetKey2Uuid(key string, uuid string) {
+	o.key2uuidMap.Store(key, uuid)
+}
+func (o *Online) DeleteKey2Uuid(key string) {
+	o.key2uuidMap.Delete(key)
+}
+func (o *Online) GetKey2Uuid(key string) (string, error) {
+	v, ok := o.key2uuidMap.Load(key)
+	if !ok {
+		return "", errors.New("key不存在")
+	}
+	value, ok := v.(string)
+	if !ok {
+		o.DeleteKey2Uuid(key)
+		return "", errors.New("key不存在")
+	}
+	return value, nil
 }

@@ -14,14 +14,15 @@ func New() *Email {
 }
 
 type Email struct {
-	Subject    string       `json:"subject"`
-	Body       string       `json:"body"`
-	From       string       `json:"from"`
-	MailTo     []Mail       `json:"mail_to"`
-	MailCc     []Mail       `json:"mail_cc"`
-	MailBcc    []Mail       `json:"mail_bcc"`
-	MailAttach []MailAttach `json:"mail_attach"`
-	Host       MailHost     `json:"host"`
+	Subject     string       `json:"subject"`
+	Body        string       `json:"body"`
+	From        string       `json:"from"`
+	CompanyName string       `json:"company_name"`
+	MailTo      []Mail       `json:"mail_to"`
+	MailCc      []Mail       `json:"mail_cc"`
+	MailBcc     []Mail       `json:"mail_bcc"`
+	MailAttach  []MailAttach `json:"mail_attach"`
+	Host        MailHost     `json:"host"`
 }
 type Mail struct {
 	Name    string `json:"name"`
@@ -39,6 +40,10 @@ type MailHost struct {
 	Port    int    `json:"port"`
 }
 
+func (obj *Email) SetCompanyName(companyName string) *Email {
+	obj.CompanyName = companyName
+	return obj
+}
 func (obj *Email) SetHost(account, name, passwd, smtp string, port int) *Email {
 	obj.Host = MailHost{
 		Account: account,

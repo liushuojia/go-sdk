@@ -1,9 +1,11 @@
 package GIN
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -67,27 +69,32 @@ const (
 type Query struct {
 	c     *gin.Context
 	Where []gen.Condition
-	//Or    [][]gen.Condition
+	Or    [][]gen.Condition
 
-	Page     int
-	PageSize int
+	db       *gorm.DB
+	page     int
+	pageSize int
 }
 
 func (q *Query) Gin(c *gin.Context) *Query {
 	q.c = c
 	return q.InitPage()
 }
+func (q *Query) SetDB(db *gorm.DB) *Query {
+	q.db = db
+	return q.InitPage()
+}
 func (q *Query) InitPage() *Query {
 	var errPage error
 	var errPageSize error
 
-	q.Page, errPage = Int(q.c, defaultPageField)
-	q.PageSize, errPageSize = Int(q.c, defaultPageSizeField)
-	if errPage != nil || q.Page <= 0 {
-		q.Page = 1
+	q.page, errPage = Int(q.c, defaultPageField)
+	q.pageSize, errPageSize = Int(q.c, defaultPageSizeField)
+	if errPage != nil || q.page <= 0 {
+		q.page = 1
 	}
-	if errPageSize != nil || q.PageSize <= 0 {
-		q.PageSize = defaultPageSize
+	if errPageSize != nil || q.pageSize <= 0 {
+		q.pageSize = defaultPageSize
 	}
 	return q
 }
@@ -113,18 +120,17 @@ func (q *Query) LikeArray(f field.String, n string) *Query {
 	if value := String(q.c, n+"_right_like"); value != "" {
 		q.Where = append(q.Where, f.Like(value+"%"))
 	}
-	//if value := StringSlice(q.c, n+"_right_like_in"); len(value) > 0 {
-	//	var conditions []gen.Condition
-	//	for _, v := range value {
-	//		if v != "" {
-	//			conditions = append(conditions, f.Like(v+"%"))
-	//		}
-	//	}
-	//	if len(conditions) > 0 {
-	//		q.Or = append(q.Or, conditions)
-	//		//q.Where = append(q.Where)
-	//	}
-	//}
+	if value := StringSlice(q.c, n+"_right_like_in"); len(value) > 0 {
+		var conditions []gen.Condition
+		for _, v := range value {
+			if v != "" {
+				conditions = append(conditions, f.Like(v+"%"))
+			}
+		}
+		if len(conditions) > 0 {
+			q.Or = append(q.Or, conditions)
+		}
+	}
 	return q.Eq(f, n)
 }
 func (q *Query) InInt64(f field.Int64, n string) *Query {
@@ -181,6 +187,31 @@ func (q *Query) RangeTime(f field.Time, n string) *Query {
 	return q
 }
 
+func (q *Query) AddWhere(condList ...gen.Condition) *Query {
+	q.Where = append(q.Where, condList...)
+	return q
+}
+func (q *Query) AddOr(condList ...[]gen.Condition) *Query {
+	q.Or = append(q.Or, condList...)
+	return q
+}
+
+func (q *Query) SetPage(page int) *Query {
+	q.page = page
+	return q
+}
+func (q *Query) SetPageSize(pageSize int) *Query {
+	q.pageSize = pageSize
+	return q
+}
+
+func (q *Query) GetPage() int {
+	return q.page
+}
+func (q *Query) GetPageSize() int {
+	return q.pageSize
+}
+
 /*
 Build
 or的方式比较特殊需要实体化的query，暂放弃
@@ -190,29 +221,18 @@ func (q *Query) Build() []gen.Condition {
 	if len(q.Where) > 0 {
 		conditionList = append(conditionList, q.Where...)
 	}
-	//if len(q.Or) > 0 {
-	//	for _, v := range q.Or {
-	//		tmpDo := gen.Cond()
-	//		if len(v) > 0 {
-	//			for _, vq := range v {
-	//				tmpDo = tmpDo.Or(vq)
-	//			}
-	//			conditionList = append(conditionList, tmpDo)
-	//		}
-	//	}
-	//}
-	//fmt.Println(q.Where)
-	//fmt.Println(q.Or)
-	//if len(q.Or) > 0 {
-	//	for _, v := range q.Or {
-	//		tmpDo := admin.WithContext(ctx)
-	//		if len(v) > 0 {
-	//			for _, vq := range v {
-	//				tmpDo = tmpDo.Or(vq)
-	//			}
-	//			conditionList = append(conditionList, tmpDo)
-	//		}
-	//	}
-	//}
+	if len(q.Or) > 0 {
+		g := &gen.DO{}
+		g.UseDB(q.db)
+		for _, v := range q.Or {
+			tmpDo := g.WithContext(context.Background())
+			if len(v) > 0 {
+				for _, vq := range v {
+					tmpDo = tmpDo.Or(vq)
+				}
+				conditionList = append(conditionList, tmpDo)
+			}
+		}
+	}
 	return conditionList
 }
