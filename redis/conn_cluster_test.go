@@ -14,8 +14,9 @@ func TestRedisCluster(t *testing.T) {
 	r := NewCluster().SetAddr(":7001").Connect()
 
 	go r.Reader(
-		func(channel, message string) {
+		func(channel, message string) error {
 			fmt.Println("channel:", channel, "message:", message)
+			return nil
 		},
 		"cluster-topic",
 		"cluster-topic2",

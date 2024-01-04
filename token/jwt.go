@@ -94,6 +94,7 @@ func (j *JWT) GetParentUUID() string {
 func (j *JWT) GetData() any {
 	return j.Claims.Data
 }
+
 func (j *JWT) LoadData(o any) error {
 	return utils.Copier(o, j.GetData())
 }

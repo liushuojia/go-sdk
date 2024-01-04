@@ -16,8 +16,9 @@ func TestRedis(t *testing.T) {
 	r.Set(r.ctx, "a", "nihao", time.Second*100).Err()
 
 	go r.Reader(
-		func(channel, message string) {
+		func(channel, message string) error {
 			fmt.Println("channel:", channel, "message:", message)
+			return nil
 		},
 		"topic",
 		"topic2",
