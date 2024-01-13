@@ -7,4 +7,5 @@ type Message struct {
 	Title   string `json:"title,omitempty"`   // 标题
 	Content string `json:"content,omitempty"` // 内容
 	Link    string `json:"link,omitempty"`    // 链接
+	Data    any    `json:"data,omitempty"`    // 具体内容
 }
