@@ -279,7 +279,7 @@ func (t *Table) Query(o m, searchMap map[string]any) *gorm.DB {
 	if tableField == nil {
 		return db
 	}
-	db = t.QueryDB(db, tableField.FieldMap, searchMap)
+	//db = t.QueryDB(db, tableField.FieldMap, searchMap)
 	db = t.QueryDB(db, tableField.JsonMap, searchMap)
 	return db
 }
