@@ -21,7 +21,7 @@ func (m *CommonMethod) IsEmpty() bool {
 
 type Querier interface {
 	// SELECT * FROM @@table WHERE id=@id AND `deleted_at` IS NULL LIMIT 1
-	Get(id int64) (*gen.T, error) // GetByID query data by id and return it as *struct*
+	//Get(id int64) (*gen.T, error) // GetByID query data by id and return it as *struct*
 }
 
 //var (
