@@ -2,7 +2,7 @@ package model
 
 import (
 	"errors"
-	"github.com/liushuojia/go-sdk/mysql/cmd/query"
+	"github.com/liushuojia/go-sdk/mysql"
 	"time"
 
 	"gorm.io/gorm"
@@ -72,7 +72,7 @@ func (m *Admin) TableName() string {
 }
 
 func (m *Admin) QueryDB(searchMap map[string]any) *gorm.DB {
-	db := query.DefaultField().Query(m, searchMap)
+	db := mysqlConn.DefaultField().Query(m, searchMap)
 	return db
 }
 func (m *Admin) SetDB(db *gorm.DB) *Admin {
@@ -88,10 +88,10 @@ func (m *Admin) SetDB(db *gorm.DB) *Admin {
 func (m *Admin) GetDB() *gorm.DB {
 	return m.db.
 		Set("tableNameSuffix", m.tableNameSuffix).
-		Scopes(query.TableOfCode(m, m.tableNameSuffix)).
+		Scopes(mysqlConn.TableOfCode(m, m.tableNameSuffix)).
 		Model(m).
 		Table(m.TableName()).
-		Select(query.DefaultField().GetFieldList(m))
+		Select(mysqlConn.DefaultField().GetFieldList(m))
 }
 func (m *Admin) SetTableNameSuffix(tableNameCode string) *Admin {
 	m.tableNameSuffix = tableNameCode
@@ -114,7 +114,7 @@ func (m *Admin) Change(updateMap map[string]interface{}) error {
 		return errors.New("ID 为空")
 	}
 
-	updateDataMap := query.DefaultField().CleanUpdateMap(m, updateMap)
+	updateDataMap := mysqlConn.DefaultField().CleanUpdateMap(m, updateMap)
 	if len(updateDataMap) <= 0 {
 		return errors.New("无更新")
 	}

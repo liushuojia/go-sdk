@@ -1,4 +1,4 @@
-package query
+package mysqlConn
 
 import (
 	"errors"

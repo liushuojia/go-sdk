@@ -1,13 +1,15 @@
-package main
+package cmd
 
 import (
 	"fmt"
 	mysqlConn "github.com/liushuojia/go-sdk/mysql"
-	"github.com/liushuojia/go-sdk/mysql/cmd/model"
+	"github.com/liushuojia/go-sdk/mysql/daemon/model"
 	"log"
+	"testing"
 )
 
-func main() {
+func TestMysql(t *testing.T) {
+	t.Log("redis test")
 
 	db, err := mysqlConn.GormDB("root", "liushuojia", "127.0.0.1", 3306, "abc")
 	if err != nil {
@@ -23,10 +25,10 @@ func main() {
 	admin := &model.Admin{}
 	admin.SetDB(db)
 
-	//admin2 := &model.Admin{}
-	//admin2.SetTableNameSuffix("you").SetDB(db)
-	//fmt.Println(admin2.Select(1))
-	//fmt.Println(admin2.GetTableNameSuffix())
+	admin2 := &model.Admin{}
+	admin2.SetTableNameSuffix("you").SetDB(db)
+	fmt.Println(admin2.Select(1))
+	fmt.Println(admin2.GetTableNameSuffix())
 
 	//admin3 := &model.Admin{}
 	//admin3.SetTableNameCode("you_aabbcc").SetDB(db)
@@ -37,7 +39,7 @@ func main() {
 	//	Scopes(query.TableOfCode(admin, "you")).
 	//	AutoMigrate(admin)
 
-	//fmt.Println(admin.Select(1))
+	fmt.Println(admin.Select(1))
 
 	fmt.Println(
 		admin.Query(
