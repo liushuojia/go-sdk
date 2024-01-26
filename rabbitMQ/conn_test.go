@@ -10,8 +10,7 @@ import (
 // 目录下 go test
 func TestRabbitMQConn(t *testing.T) {
 
-	c := New()
-	c.SetUrl("admin", "admin", "localhost", 5672, "/")
+	c := New().SetUrl("admin", "admin", "localhost", 5672, "/")
 	if err := c.Connect(); err != nil {
 		panic(err)
 	}
