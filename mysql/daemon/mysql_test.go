@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	mysqlConn "github.com/liushuojia/go-sdk/mysql"
 	"github.com/liushuojia/go-sdk/mysql/daemon/model"
 	"log"
@@ -9,7 +8,7 @@ import (
 )
 
 func TestMysql(t *testing.T) {
-	t.Log("redis test")
+	t.Log("mysql test")
 
 	db, err := mysqlConn.GormDB("root", "liushuojia", "127.0.0.1", 3306, "abc")
 	if err != nil {
@@ -25,9 +24,9 @@ func TestMysql(t *testing.T) {
 	admin := &model.Admin{}
 	admin.SetDB(db)
 
-	admin2 := &model.Admin{}
-	admin2.SetTableNameSuffix("you").SetDB(db)
-	fmt.Println(admin2.Select(1))
+	//admin2 := &model.Admin{}
+	//admin2.SetTableNameSuffix("you").SetDB(db)
+	//fmt.Println(admin2.Select(1))
 	//fmt.Println(admin2.GetTableNameSuffix())
 
 	//admin3 := &model.Admin{}
@@ -41,15 +40,15 @@ func TestMysql(t *testing.T) {
 
 	//fmt.Println(admin.Select(1))
 	//
-	fmt.Println(
-		admin.Query(
-			map[string]any{
-				"Username_like": "xiao",
-			},
-			0,
-			0,
-		),
-	)
+	//fmt.Println(
+	//	admin.Query(
+	//		map[string]any{
+	//			"Username_like": "xiao",
+	//		},
+	//		0,
+	//		0,
+	//	),
+	//)
 
 	//admin.Create()
 	//fmt.Println(query.DataFieldList.GetFieldList(admin))

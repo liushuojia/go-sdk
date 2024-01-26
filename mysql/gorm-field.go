@@ -322,8 +322,15 @@ func (t *Table) Query(o m, searchMap map[string]any) *gorm.DB {
 	if tableField == nil {
 		return db
 	}
+
+	gormMap := make(map[string]string)
+	for k := range tableField.GormMap {
+		gormMap[k] = k
+	}
+	db = t.QueryDB(db, gormMap, searchMap)
+
 	//db = t.QueryDB(db, tableField.FieldMap, searchMap)
-	db = t.QueryDB(db, tableField.JsonMap, searchMap)
+	//db = t.QueryDB(db, tableField.JsonMap, searchMap)
 	return db
 }
 
