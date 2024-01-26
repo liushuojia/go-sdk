@@ -77,14 +77,7 @@ func (m *Admin) SetDB(db *gorm.DB) *Admin {
 	return m
 }
 func (m *Admin) GetDB() *gorm.DB {
-	return m.db.
-		Session(
-			&gorm.Session{
-				QueryFields: true,
-				PrepareStmt: true,
-				NewDB:       true,
-			},
-		).
+	return mysqlConn.DefaultDB(m.db).
 		Set("tableNameSuffix", m.tableNameSuffix).
 		Scopes(mysqlConn.TableOfCode(m, m.tableNameSuffix)).
 		Model(m).

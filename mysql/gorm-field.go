@@ -10,10 +10,10 @@ import (
 	"sync"
 )
 
-var Field = NewTableField()
+var field = NewTableField()
 
 func DefaultField() *Table {
-	return Field
+	return field
 }
 
 func NewTableField() *Table {

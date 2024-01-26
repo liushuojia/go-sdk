@@ -49,17 +49,11 @@ func (m *FileDefault) QueryDB(searchMap map[string]any) *gorm.DB {
 	return db
 }
 func (m *FileDefault) SetDB(db *gorm.DB) *FileDefault {
-	m.db = db.Session(
-		&gorm.Session{
-			QueryFields: true,
-			PrepareStmt: true,
-			NewDB:       true,
-		},
-	)
+	m.db = db
 	return m
 }
 func (m *FileDefault) GetDB() *gorm.DB {
-	return m.db.
+	return mysqlConn.DefaultDB(m.db).
 		Set("tableNameSuffix", m.tableNameSuffix).
 		Scopes(mysqlConn.TableOfCode(m, m.tableNameSuffix)).
 		Model(m).
