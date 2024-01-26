@@ -28,7 +28,7 @@ func TestMysql(t *testing.T) {
 	admin2 := &model.Admin{}
 	admin2.SetTableNameSuffix("you").SetDB(db)
 	fmt.Println(admin2.Select(1))
-	fmt.Println(admin2.GetTableNameSuffix())
+	//fmt.Println(admin2.GetTableNameSuffix())
 
 	//admin3 := &model.Admin{}
 	//admin3.SetTableNameCode("you_aabbcc").SetDB(db)
@@ -39,8 +39,8 @@ func TestMysql(t *testing.T) {
 	//	Scopes(query.TableOfCode(admin, "you")).
 	//	AutoMigrate(admin)
 
-	fmt.Println(admin.Select(1))
-
+	//fmt.Println(admin.Select(1))
+	//
 	fmt.Println(
 		admin.Query(
 			map[string]any{

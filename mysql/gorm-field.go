@@ -22,11 +22,24 @@ func NewTableField() *Table {
 
 type TableField struct {
 	SQLFieldList []string                `json:"sql_field_list"` // 数据库字段
-	GormMap      map[string]reflect.Type `json:"gorm_map"`       // key gormName		: value 类型
+	GormMap      map[string]GormField    `json:"gorm_map"`       // key sql字段			: value 类型
 	FieldType    map[string]reflect.Type `json:"field_type"`     // key model KEY		: value 类型
 	FieldMap     map[string]string       `json:"field_map"`      // key model KEY		: sql字段
 	JsonMap      map[string]string       `json:"json_map"`       // key jsonName		: sql字段
 	AutoMigrate  map[string]bool         `json:"auto_migrate"`   // 表是否初始化=
+}
+
+type GormField struct {
+	Column        string `json:"column"`
+	Type          string `json:"type"`
+	TypeLength    string `json:"type_length"`
+	Comment       string `json:"comment"`
+	Default       string `json:"default"`
+	PrimaryKey    bool   `json:"primary_key"`
+	Unique        bool   `json:"unique"`
+	NotNull       bool   `json:"not_null"`
+	AutoIncrement bool   `json:"auto_increment"`
+	Index         bool   `json:"index"`
 }
 
 type m interface {
@@ -60,7 +73,7 @@ func (t *Table) Set(o m) error {
 	}
 
 	tableFieldData := TableField{
-		GormMap:   make(map[string]reflect.Type),
+		GormMap:   make(map[string]GormField),
 		FieldType: make(map[string]reflect.Type),
 		FieldMap:  make(map[string]string),
 		JsonMap:   make(map[string]string),
@@ -68,15 +81,45 @@ func (t *Table) Set(o m) error {
 
 	for i := 0; i < getType.NumField(); i++ {
 		field := getType.Field(i)
-		gormName := field.Tag.Get("gorm")
-		if gormName == "" || gormName == "-" {
+		gormString := field.Tag.Get("gorm")
+		if gormString == "" || gormString == "-" {
 			continue
 		}
-		if index := strings.Index(gormName, "column:"); index >= 0 {
-			gormName = gormName[index+len("column:"):]
+
+		stringMap := make(map[string]string)
+		boolMap := make(map[string]bool)
+		for _, v := range strings.Split(gormString, ";") {
+			v = strings.Trim(v, " ")
+			if v == "" {
+				continue
+			}
+			tmp := strings.Split(v, ":")
+			if len(tmp) == 1 {
+				boolMap[tmp[0]] = true
+				continue
+			}
+			stringMap[tmp[0]] = tmp[1]
 		}
-		if index := strings.Index(gormName, ";"); index >= 0 {
-			gormName = gormName[:index]
+
+		typeString := strings.ToLower(stringMap["type"])
+		typeLength := ""
+		tmp1 := strings.Split(typeString, "(")
+		if len(tmp1) > 1 {
+			typeString = tmp1[0]
+			typeLength = strings.Trim(tmp1[1], ")")
+		}
+
+		gormField := GormField{
+			Column:        stringMap["column"],
+			Type:          typeString,
+			TypeLength:    typeLength,
+			Comment:       stringMap["comment"],
+			Default:       stringMap["default"],
+			PrimaryKey:    boolMap["primaryKey"],
+			Unique:        boolMap["unique"],
+			NotNull:       boolMap["not null"],
+			AutoIncrement: boolMap["autoIncrement"],
+			Index:         boolMap["index"],
 		}
 
 		jsonName := field.Tag.Get("json")
@@ -85,11 +128,11 @@ func (t *Table) Set(o m) error {
 		}
 		jsonName = strings.Trim(jsonName, " ")
 
-		tableFieldData.GormMap[gormName] = field.Type
+		tableFieldData.GormMap[gormField.Column] = gormField
 		tableFieldData.FieldType[field.Name] = field.Type
-		tableFieldData.FieldMap[field.Name] = gormName
-		tableFieldData.JsonMap[jsonName] = gormName
-		tableFieldData.SQLFieldList = append(tableFieldData.SQLFieldList, gormName)
+		tableFieldData.FieldMap[field.Name] = gormField.Column
+		tableFieldData.JsonMap[jsonName] = gormField.Column
+		tableFieldData.SQLFieldList = append(tableFieldData.SQLFieldList, gormField.Column)
 	}
 
 	t.data.Store(o.TableName(), tableFieldData)

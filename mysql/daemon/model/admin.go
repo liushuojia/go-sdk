@@ -14,10 +14,10 @@ type Admin struct {
 	db              *gorm.DB
 	tableNameSuffix string
 
-	ID                      int64          `json:"id" gorm:"column:id; primaryKey; comment:自动编号;"`
-	CreatedAt               time.Time      `json:"created_at" gorm:"column:created_at; type:DATETIME; autoCreateTime; not null; comment:创建时间;"`
-	UpdatedAt               time.Time      `json:"updated_at" gorm:"column:updated_at; type:DATETIME; autoUpdateTime; not null; comment:更新时间;"`
-	DeletedAt               gorm.DeletedAt `json:"-" gorm:"column:deleted_at; index; comment:删除时间;"`
+	ID                      int64          `json:"id" gorm:"column:id; primaryKey; type:bigint; comment:自动编号;"`
+	CreatedAt               time.Time      `json:"created_at" gorm:"column:created_at; type:timestamp; autoCreateTime; not null; comment:创建时间;"`
+	UpdatedAt               time.Time      `json:"updated_at" gorm:"column:updated_at; type:timestamp; autoUpdateTime; not null; comment:更新时间;"`
+	DeletedAt               gorm.DeletedAt `json:"-" gorm:"column:deleted_at; type:timestamp; index; comment:删除时间;"`
 	Username                string         `json:"username" gorm:"column:username; type:char(32); not null; comment:英文名;"`
 	Realname                string         `json:"realname" gorm:"column:realname; type:char(32); not null; comment:姓名;"`
 	Email                   string         `json:"email" gorm:"column:email; type:char(64); not null; comment:邮箱;"`
@@ -25,14 +25,14 @@ type Admin struct {
 	Status                  int64          `json:"status" gorm:"column:status; type:tinyint; not null; index; comment:状态;"`
 	Verify                  string         `json:"verify" gorm:"column:verify; type:char(32); not null; comment:密钥;"`
 	WeekVerify              string         `json:"week_verify" gorm:"column:week_verify; type:char(32); not null; comment:每周密钥;"`
-	EntryDate               int64          `json:"entry_date" gorm:"column:entry_date; type:int; not null; index; comment:入职时间;"`
+	EntryDate               int64          `json:"entry_date" gorm:"column:entry_date; type:int(11); not null; index; comment:入职时间;"`
 	OpRole                  int64          `json:"op_role" gorm:"column:op_role; type:tinyint; not null; index; comment:后台用户;"`
 	AdminRole               int64          `json:"admin_role" gorm:"column:admin_role; type:tinyint; not null; index; comment:管理员;"`
 	EmailFlag               int64          `json:"email_flag" gorm:"column:email_flag; type:tinyint; not null; index; comment:邮件验证状态;"`
 	MobileFlag              int64          `json:"mobile_flag" gorm:"column:mobile_flag; type:tinyint; not null; index; comment:手机验证状态;"`
 	DepartmentCode          string         `json:"department_code" gorm:"column:department_code; type:char(32); not null; index; comment:部门编码;"`
 	DepartmentName          string         `json:"department_name" gorm:"column:department_name; type:char(32); not null; comment:部门名称;"`
-	SelectStopTime          int64          `json:"select_stop_time" gorm:"column:select_stop_time; type:int; not null; index; comment:停用账号时间;"`
+	SelectStopTime          int64          `json:"select_stop_time" gorm:"column:select_stop_time; type:int(11); not null; index; comment:停用账号时间;"`
 	BelongOp                int64          `json:"belong_op" gorm:"column:belong_op; type:bigint; not null; index; comment:所属客服id;"`
 	BelongOpName            string         `json:"belong_op_name" gorm:"column:belong_op_name; type:char(32); not null; comment:所属客服名称;"`
 	BelongDepartmentCode    string         `json:"belong_department_code" gorm:"column:belong_department_code; type:char(32); not null; index; comment:客服所属部门编码;"`
@@ -54,17 +54,14 @@ type Admin struct {
 	WorkWeixin              string         `json:"work_weixin" gorm:"column:work_weixin; type:char(32); not null; comment:工作微信;"`
 	Wangwang                string         `json:"wangwang" gorm:"column:wangwang; type:char(32); not null; comment:阿里旺旺;"`
 	Weixin                  string         `json:"weixin" gorm:"column:weixin; type:char(32); not null; comment:微信号;"`
-	UserType                string         `json:"user_type" gorm:"column:user_type; type:char(32); not null; comment:客户类型;"`
-	UserTypeCode            string         `json:"user_type_code" gorm:"column:user_type_code; type:char(32); not null; index; comment:客户类型编码;"`
-	LastFollowTime          int64          `json:"last_follow_time" gorm:"column:last_follow_time; type:int; not null; index; comment:最后跟进时间;"`
-	LastConsultationTime    int64          `json:"last_consultation_time" gorm:"column:last_consultation_time; type:int; not null; index; comment:最后分配咨询时间;"`
-	LastIncallTime          int64          `json:"last_incall_time" gorm:"column:last_incall_time; type:int; not null; index; comment:最后咨询时间;"`
+	LastFollowTime          int64          `json:"last_follow_time" gorm:"column:last_follow_time; type:int(11); not null; index; comment:最后跟进时间;"`
+	LastConsultationTime    int64          `json:"last_consultation_time" gorm:"column:last_consultation_time; type:int(11); not null; index; comment:最后分配咨询时间;"`
+	LastIncallTime          int64          `json:"last_incall_time" gorm:"column:last_incall_time; type:int(11); not null; index; comment:最后咨询时间;"`
 	IncallDistributionFlag  int64          `json:"incall_distribution_flag" gorm:"column:incall_distribution_flag; type:tinyint; not null; index; comment:咨询分配开关;"`
-	IncallDistributionNum   int64          `json:"incall_distribution_num" gorm:"column:incall_distribution_num; type:int; not null; comment:咨询分配总数;"`
+	IncallDistributionNum   int64          `json:"incall_distribution_num" gorm:"column:incall_distribution_num; type:int(11); not null; comment:咨询分配总数;"`
 	CreateName              string         `json:"create_name" gorm:"column:create_name; type:char(32); not null; comment:创建人;"`
-	OpChangeNum             int64          `json:"op_change_num" gorm:"column:op_change_num; type:int; not null; comment:转交OP次数;"`
+	OpChangeNum             int64          `json:"op_change_num" gorm:"column:op_change_num; type:int(11); not null; comment:转交OP次数;"`
 	BelongUserId            int64          `json:"belong_user_id" gorm:"column:belong_user_id; type:bigint; not null; index; comment:所属联系人id，如果不为0，则被合并;"`
-	WjtToken                string         `json:"wjt_token" gorm:"column:wjt_token; type:char(32); not null; comment:WJT加密密钥;"`
 }
 
 func (m *Admin) TableName() string {
@@ -76,17 +73,18 @@ func (m *Admin) QueryDB(searchMap map[string]any) *gorm.DB {
 	return db
 }
 func (m *Admin) SetDB(db *gorm.DB) *Admin {
-	m.db = db.Session(
-		&gorm.Session{
-			QueryFields: true,
-			PrepareStmt: true,
-			NewDB:       true,
-		},
-	)
+	m.db = db
 	return m
 }
 func (m *Admin) GetDB() *gorm.DB {
 	return m.db.
+		Session(
+			&gorm.Session{
+				QueryFields: true,
+				PrepareStmt: true,
+				NewDB:       true,
+			},
+		).
 		Set("tableNameSuffix", m.tableNameSuffix).
 		Scopes(mysqlConn.TableOfCode(m, m.tableNameSuffix)).
 		Model(m).
