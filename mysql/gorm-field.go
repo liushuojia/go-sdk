@@ -194,6 +194,7 @@ func (t *Table) SetAutoMigrate(name string, f bool) {
 func (t *Table) QueryDB(db *gorm.DB, fieldMap map[string]string, searchMap map[string]any) *gorm.DB {
 	for field, sqlField := range fieldMap {
 		field = strings.Trim(field, " ")
+
 		sqlField = strings.Trim(sqlField, " ")
 		if field == "" || sqlField == "" {
 			continue
@@ -253,17 +254,32 @@ func (t *Table) QueryDB(db *gorm.DB, fieldMap map[string]string, searchMap map[s
 
 		if value, ok := searchMap[field+"_in"]; ok {
 			var tmp []interface{}
-			if v, ok := value.(string); ok && v != "" {
-				tt := strings.Split(v, ",")
-				for _, vTmp := range tt {
+			switch v := value.(type) {
+			case string:
+				if v != "" {
+					tt := strings.Split(v, ",")
+					for _, vTmp := range tt {
+						vTmp = strings.Trim(vTmp, " ")
+						if vTmp != "" {
+							tmp = append(tmp, vTmp)
+						}
+					}
+				}
+			case []string:
+				for _, vTmp := range v {
 					vTmp = strings.Trim(vTmp, " ")
 					if vTmp != "" {
 						tmp = append(tmp, vTmp)
 					}
 				}
-			}
-			if v, ok := value.([]interface{}); ok && len(v) > 0 {
-				tmp = v
+			case []int:
+				for _, vTmp := range v {
+					tmp = append(tmp, vTmp)
+				}
+			case []int64:
+				for _, vTmp := range v {
+					tmp = append(tmp, vTmp)
+				}
 			}
 
 			if len(tmp) > 0 {
@@ -272,17 +288,32 @@ func (t *Table) QueryDB(db *gorm.DB, fieldMap map[string]string, searchMap map[s
 		}
 		if value, ok := searchMap[field+"_not_in"]; ok {
 			var tmp []interface{}
-			if v, ok := value.(string); ok && v != "" {
-				tt := strings.Split(v, ",")
-				for _, vTmp := range tt {
+			switch v := value.(type) {
+			case string:
+				if v != "" {
+					tt := strings.Split(v, ",")
+					for _, vTmp := range tt {
+						vTmp = strings.Trim(vTmp, " ")
+						if vTmp != "" {
+							tmp = append(tmp, vTmp)
+						}
+					}
+				}
+			case []string:
+				for _, vTmp := range v {
 					vTmp = strings.Trim(vTmp, " ")
 					if vTmp != "" {
 						tmp = append(tmp, vTmp)
 					}
 				}
-			}
-			if v, ok := value.([]interface{}); ok && len(v) > 0 {
-				tmp = v
+			case []int:
+				for _, vTmp := range v {
+					tmp = append(tmp, vTmp)
+				}
+			case []int64:
+				for _, vTmp := range v {
+					tmp = append(tmp, vTmp)
+				}
 			}
 			if len(tmp) > 0 {
 				db = db.Where(sqlField+" not in (?)", tmp)
@@ -303,7 +334,7 @@ func (t *Table) QueryDB(db *gorm.DB, fieldMap map[string]string, searchMap map[s
 					interfaceList = append(interfaceList, v+"%")
 				}
 			}
-			if v, ok := value.([]interface{}); ok && len(v) > 0 {
+			if v, ok := value.([]string); ok && len(v) > 0 {
 				for _, vTmp := range v {
 					sqlString += " or " + sqlField + " like ?"
 					interfaceList = append(interfaceList, fmt.Sprintf("%v", vTmp)+"%")
@@ -314,6 +345,83 @@ func (t *Table) QueryDB(db *gorm.DB, fieldMap map[string]string, searchMap map[s
 			}
 		}
 	}
+	return db
+}
+func (t *Table) QueryOrderBy(db *gorm.DB, gormFieldMap map[string]string, order_by any) *gorm.DB {
+	var order_by_list []string
+
+	switch v := order_by.(type) {
+	case []string:
+		order_by_list = append(order_by_list, v...)
+	case string:
+		if l := strings.Split(strings.Trim(v, " "), ","); len(l) > 0 {
+			order_by_list = append(order_by_list, l...)
+		}
+	}
+	if len(order_by_list) <= 0 {
+		return db.Order("updated_at desc")
+	}
+
+	//hasOrder := false
+	strTmp := "FIELD"
+	strSplit := "*"
+	for _, ov := range order_by_list {
+		ov = strings.Trim(ov, " ")
+		if ov == "" {
+			continue
+		}
+		order_array := strings.Split(ov, " ")
+
+		if strings.ToUpper(order_array[0]) == strTmp {
+			if len(order_array) != 4 {
+				continue
+			}
+			order_by_key := order_array[1]
+			if order_by_key == "" {
+				continue
+			}
+			if _, ok := gormFieldMap[order_by_key]; !ok {
+				continue
+			}
+
+			order_num := strings.Split(order_array[2], strSplit)
+			sqlString := ""
+			for _, v := range order_num {
+				if _, err := strconv.Atoi(v); err == nil {
+					sqlString += "," + v
+				}
+			}
+
+			thisOrderDesc := strings.ToLower(order_array[3])
+			if thisOrderDesc != "asc" && thisOrderDesc != "desc" {
+				thisOrderDesc = " asc"
+			}
+
+			if sqlString != "" {
+				sqlString = "FIELD(" + order_by_key + sqlString + ") " + thisOrderDesc
+				db = db.Order(sqlString)
+			}
+		} else {
+			order_by_key := order_array[0]
+			if order_by_key == "" {
+				continue
+			}
+			if _, ok := gormFieldMap[order_by_key]; !ok {
+				continue
+			}
+
+			order_by_value := "asc"
+			if len(order_array) == 2 {
+				order_by_value = strings.ToLower(order_array[1])
+			}
+			if order_by_value != "asc" && order_by_value != "desc" {
+				continue
+			}
+
+			db = db.Order(order_by_key + " " + order_by_value)
+		}
+	}
+
 	return db
 }
 func (t *Table) Query(o m, searchMap map[string]any) *gorm.DB {
@@ -328,9 +436,12 @@ func (t *Table) Query(o m, searchMap map[string]any) *gorm.DB {
 		gormMap[k] = k
 	}
 	db = t.QueryDB(db, gormMap, searchMap)
-
-	//db = t.QueryDB(db, tableField.FieldMap, searchMap)
+	db = t.QueryDB(db, tableField.FieldMap, searchMap)
 	//db = t.QueryDB(db, tableField.JsonMap, searchMap)
+
+	if v, ok := searchMap["order_by"]; ok {
+		db = t.QueryOrderBy(db, gormMap, v)
+	}
 	return db
 }
 

@@ -10,7 +10,7 @@ var (
 	password = flag.String("p", "liushuojia", "-p password")
 	host     = flag.String("h", "127.0.0.1", "-h host")
 	port     = flag.Int("P", 3306, "-P port")
-	db       = flag.String("db", "my_test", "-db database")
+	db       = flag.String("db", "abc", "-db database")
 )
 
 func main() {

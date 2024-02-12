@@ -63,6 +63,7 @@ func New() *Query {
 const (
 	defaultPageField     = "page"
 	defaultPageSizeField = "pageSize"
+	defaultOrderByField  = "order_by"
 	defaultPageSize      = 30
 )
 
@@ -188,11 +189,15 @@ func (q *Query) RangeTime(f field.Time, n string) *Query {
 }
 
 func (q *Query) AddWhere(condList ...gen.Condition) *Query {
-	q.Where = append(q.Where, condList...)
+	if len(condList) > 0 {
+		q.Where = append(q.Where, condList...)
+	}
 	return q
 }
 func (q *Query) AddOr(condList ...[]gen.Condition) *Query {
-	q.Or = append(q.Or, condList...)
+	if len(condList) > 0 {
+		q.Or = append(q.Or, condList...)
+	}
 	return q
 }
 
@@ -221,7 +226,7 @@ func (q *Query) Build() []gen.Condition {
 	if len(q.Where) > 0 {
 		conditionList = append(conditionList, q.Where...)
 	}
-	if len(q.Or) > 0 {
+	if q.db != nil && len(q.Or) > 0 {
 		g := &gen.DO{}
 		g.UseDB(q.db)
 		for _, v := range q.Or {

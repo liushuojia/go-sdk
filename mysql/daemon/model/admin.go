@@ -20,7 +20,7 @@ type Admin struct {
 	DeletedAt               gorm.DeletedAt `json:"-" gorm:"column:deleted_at; type:timestamp; index; comment:删除时间;"`
 	Username                string         `json:"username" gorm:"column:username; type:char(32); not null; comment:英文名;"`
 	Realname                string         `json:"realname" gorm:"column:realname; type:char(32); not null; comment:姓名;"`
-	Email                   string         `json:"email" gorm:"column:email; type:char(64); not null; comment:邮箱;"`
+	Email                   string         `json:"email" gorm:"column:email; type:char(64); not null; index; comment:邮箱;"`
 	Mobile                  string         `json:"mobile" gorm:"column:mobile; type:char(11); not null; index; comment:手机;"`
 	Status                  int64          `json:"status" gorm:"column:status; type:tinyint; not null; index; comment:状态;"`
 	Verify                  string         `json:"verify" gorm:"column:verify; type:char(32); not null; comment:密钥;"`
@@ -65,6 +65,9 @@ type Admin struct {
 }
 
 func (m *Admin) TableName() string {
+	if m.tableNameSuffix != "" {
+		return TableNameAdmin + mysqlConn.TableSeparator() + m.tableNameSuffix
+	}
 	return TableNameAdmin
 }
 
@@ -79,7 +82,7 @@ func (m *Admin) SetDB(db *gorm.DB) *Admin {
 func (m *Admin) GetDB() *gorm.DB {
 	return mysqlConn.DefaultDB(m.db).
 		Set("tableNameSuffix", m.tableNameSuffix).
-		Scopes(mysqlConn.TableOfCode(m, m.tableNameSuffix)).
+		Scopes(mysqlConn.TableOfCode(m)).
 		Model(m).
 		Table(m.TableName()).
 		Select(mysqlConn.DefaultField().GetFieldList(m))
@@ -98,7 +101,7 @@ func (m *Admin) Select(id int64) error {
 	if id <= 0 {
 		return errors.New("ID 为空")
 	}
-	return m.GetDB().Take(m).Error
+	return m.GetDB().Take(m, id).Error
 }
 func (m *Admin) Change(updateMap map[string]interface{}) error {
 	if m.ID <= 0 {

@@ -90,7 +90,7 @@ func main() {
 				EqInt64(user.ID, "id").
 				LikeArray(user.Name, "name")
 
-			userList, totalSize, err := user.Where(q.Build()...).FindByPage((q.Page-1)*q.PageSize, q.PageSize)
+			userList, totalSize, err := user.Where(q.Build()...).FindByPage((q.GetPage()-1)*q.GetPageSize(), q.GetPageSize())
 
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, err)
@@ -99,10 +99,10 @@ func main() {
 
 			c.JSON(http.StatusOK, gin.H{
 				"page": gin.H{
-					"page":      q.Page,
-					"pageSize":  q.PageSize,
+					"page":      q.GetPage(),
+					"pageSize":  q.GetPageSize(),
 					"totalSize": totalSize,
-					"totalPage": int64(math.Ceil(float64(totalSize) / float64(q.PageSize))),
+					"totalPage": int64(math.Ceil(float64(totalSize) / float64(q.GetPageSize()))),
 				},
 				"data": userList,
 			})
@@ -222,18 +222,18 @@ func main() {
 	ws := router.Group("ws", Auth())
 	{
 		ws.GET("test", func(c *gin.Context) {
-			conn, id, err := websocketConn.Init(c)
+			wsConn := websocketConn.New()
+			conn, id, err := wsConn.Init(c)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, err)
 				return
 			}
-			defer websocketConn.Close(id)
 			defer conn.Close()
 
 			go func() {
 				for i := 0; i < 10; i++ {
 					time.Sleep(2 * time.Second)
-					websocketConn.Message(id, []byte("hi "+strconv.Itoa(i)))
+					wsConn.Message(id, []byte("hi "+strconv.Itoa(i)))
 				}
 			}()
 

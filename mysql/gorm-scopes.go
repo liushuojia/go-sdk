@@ -1,6 +1,7 @@
 package mysqlConn
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -8,24 +9,33 @@ import (
 	"strings"
 )
 
-func TableOfCode(u m, code string) func(db *gorm.DB) *gorm.DB {
+type TableIndexField struct {
+	Table       string `gorm:"column:Table"`
+	KeyName     string `gorm:"column:Key_name"`
+	ColumnName  string `gorm:"column:Column_name"`
+	NonUnique   int64  `gorm:"column:Non_unique"`
+	SeqInIndex  int64  `gorm:"column:Seq_in_index"`
+	Collation   string `gorm:"column:Collation"`
+	Cardinality int64  `gorm:"column:Cardinality"`
+	IndexType   string `gorm:"column:Index_type"`
+}
+
+func TableSeparator() string {
+	return "_"
+}
+func TableOfCode(u m) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		tableName := u.TableName()
-		if code != "" {
-			tableName += "_" + code
-		}
 
 		field := DefaultField()
 		if !field.GetAutoMigrate(tableName) {
-
-			rows, err := db.
-				Session(&gorm.Session{NewDB: true}).
+			field.SetAutoMigrate(tableName, true)
+			rows, err := db.Session(&gorm.Session{NewDB: true}).
 				Raw(fmt.Sprintf("desc %s", tableName)).
 				Rows()
 
 			if err != nil {
-				db.
-					Session(&gorm.Session{NewDB: true}).
+				db.Session(&gorm.Session{NewDB: true}).
 					Table(tableName).
 					AutoMigrate(u)
 			} else {
@@ -175,9 +185,16 @@ func TableOfCode(u m, code string) func(db *gorm.DB) *gorm.DB {
 						}
 						sqlExec = append(sqlExec, sqlString)
 					}
+
+					////SHOW INDEXES FROM admin;
 					if gormField.Unique != sqlGormField.Unique {
 						if sqlGormField.Unique {
-							sqlExec = append(sqlExec, "ALTER TABLE "+tableName+" DROP INDEX "+sqlGormField.Column)
+							var dataMap TableIndexField
+							if err := db.Session(&gorm.Session{NewDB: true}).
+								Raw("SHOW INDEXES FROM "+tableName+" where column_name = ? ", sqlGormField.Column).
+								First(&dataMap).Error; err == nil {
+								sqlExec = append(sqlExec, "ALTER TABLE "+tableName+" DROP INDEX "+dataMap.KeyName)
+							}
 						}
 						if gormField.Unique {
 							sqlExec = append(sqlExec, "ALTER TABLE "+tableName+" ADD UNIQUE INDEX ("+gormField.Column+")")
@@ -185,7 +202,12 @@ func TableOfCode(u m, code string) func(db *gorm.DB) *gorm.DB {
 					}
 					if gormField.Index != sqlGormField.Index {
 						if sqlGormField.Index {
-							sqlExec = append(sqlExec, "ALTER TABLE "+tableName+" DROP INDEX "+sqlGormField.Column)
+							var dataMap TableIndexField
+							if err := db.Session(&gorm.Session{NewDB: true}).
+								Raw("SHOW INDEXES FROM "+tableName+" where column_name = ? ", sqlGormField.Column).
+								First(&dataMap).Error; err == nil {
+								sqlExec = append(sqlExec, "ALTER TABLE "+tableName+" DROP INDEX "+dataMap.KeyName)
+							}
 						}
 						if gormField.Index {
 							sqlExec = append(sqlExec, "ALTER TABLE "+tableName+" ADD INDEX ("+gormField.Column+")")
@@ -237,4 +259,43 @@ func Paginate(c *gin.Context) func(db *gorm.DB) *gorm.DB {
 		offset := (page - 1) * pageSize
 		return db.Offset(offset).Limit(pageSize)
 	}
+}
+
+func QueryData(db *gorm.DB, fileList []string, groupBy []string, orderBy []string, data interface{}) error {
+	if db == nil {
+		return errors.New("请传递已链接数据库的 DB")
+	}
+
+	if len(groupBy) > 0 {
+		strGroupBy := ""
+		for _, v := range groupBy {
+			if strGroupBy != "" {
+				strGroupBy += ","
+			}
+			strGroupBy += v
+		}
+		if strGroupBy != "" {
+			db = db.Group(strGroupBy)
+		}
+	}
+
+	if len(orderBy) > 0 {
+		for _, v := range orderBy {
+			db = db.Order(v)
+		}
+	}
+	db = db.Select(fileList)
+
+	return db.Find(data).Error
+}
+func QueryPage(db *gorm.DB, page int, pageSize int) *gorm.DB {
+	if page > 1 && pageSize > 0 {
+		db = db.Limit(pageSize).
+			Offset((page - 1) * pageSize)
+	} else {
+		if pageSize > 0 {
+			db = db.Limit(pageSize)
+		}
+	}
+	return db
 }

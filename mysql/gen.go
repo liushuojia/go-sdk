@@ -19,6 +19,19 @@ func (m *CommonMethod) IsEmpty() bool {
 	return m.ID == 0
 }
 
+// TableName
+//func (m CommonMethod) TableName() string {
+//	return "@@table"
+//}
+
+// TableName table name with gorm NamingStrategy
+//func (m CommonMethod) TableName(namer schema.Namer) string {
+//	if namer == nil {
+//		return "@@table"
+//	}
+//	return namer.TableName("@@table")
+//}
+
 type Querier interface {
 	// SELECT * FROM @@table WHERE id=@id AND `deleted_at` IS NULL LIMIT 1
 	//Get(id int64) (*gen.T, error) // GetByID query data by id and return it as *struct*

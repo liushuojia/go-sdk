@@ -55,7 +55,7 @@ func (m *FileDefault) SetDB(db *gorm.DB) *FileDefault {
 func (m *FileDefault) GetDB() *gorm.DB {
 	return mysqlConn.DefaultDB(m.db).
 		Set("tableNameSuffix", m.tableNameSuffix).
-		Scopes(mysqlConn.TableOfCode(m, m.tableNameSuffix)).
+		Scopes(mysqlConn.TableOfCode(m)).
 		Model(m).
 		Table(m.TableName()).
 		Select(mysqlConn.DefaultField().GetFieldList(m))
