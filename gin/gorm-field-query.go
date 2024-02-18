@@ -17,8 +17,8 @@ type GormQuery struct {
 	c          *gin.Context
 	expression []clause.Expression
 	orderBy    []string
-	page       int
-	pageSize   int
+	page       int64
+	pageSize   int64
 }
 
 func (q *GormQuery) Gin(c *gin.Context) *GormQuery {
@@ -26,10 +26,10 @@ func (q *GormQuery) Gin(c *gin.Context) *GormQuery {
 	return q.InitPage().InitOrderBy()
 }
 
-func (q *GormQuery) GetPage() int {
+func (q *GormQuery) GetPage() int64 {
 	return q.page
 }
-func (q *GormQuery) GetPageSize() int {
+func (q *GormQuery) GetPageSize() int64 {
 	return q.pageSize
 }
 func (q *GormQuery) GetOrderBy() []string {
@@ -39,11 +39,11 @@ func (q *GormQuery) GetQuery() []clause.Expression {
 	return q.expression
 }
 
-func (q *GormQuery) SetPage(page int) *GormQuery {
+func (q *GormQuery) SetPage(page int64) *GormQuery {
 	q.page = page
 	return q
 }
-func (q *GormQuery) SetPageSize(pageSize int) *GormQuery {
+func (q *GormQuery) SetPageSize(pageSize int64) *GormQuery {
 	q.pageSize = pageSize
 	return q
 }
@@ -51,8 +51,8 @@ func (q *GormQuery) InitPage() *GormQuery {
 	var errPage error
 	var errPageSize error
 
-	q.page, errPage = Int(q.c, defaultPageField)
-	q.pageSize, errPageSize = Int(q.c, defaultPageSizeField)
+	q.page, errPage = Int64(q.c, defaultPageField)
+	q.pageSize, errPageSize = Int64(q.c, defaultPageSizeField)
 	if errPage != nil || q.page <= 0 {
 		q.page = 1
 	}
@@ -80,8 +80,8 @@ func (q *GormQuery) InitOrderBy() *GormQuery {
 	}
 	return q
 }
-func (q *GormQuery) AddSearch(expression clause.Expression) *GormQuery {
-	q.expression = append(q.expression, expression)
+func (q *GormQuery) AddSearch(sqlString string, args ...interface{}) *GormQuery {
+	q.expression = append(q.expression, gorm.Expr(sqlString, args...))
 	return q
 }
 func (q *GormQuery) EqInt64(n string) *GormQuery {

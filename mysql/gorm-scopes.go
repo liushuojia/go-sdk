@@ -217,9 +217,10 @@ func TableOfCode(u m) func(db *gorm.DB) *gorm.DB {
 					delete(gormFieldMap, gormField.Column)
 				}
 
-				for _, v := range gormFieldMap {
-					sqlExec = append(sqlExec, "ALTER TABLE "+tableName+" DROP "+v.Column)
-				}
+				// 为了数据安全，暂时不执行任何删除字段
+				//for _, v := range gormFieldMap {
+				//	sqlExec = append(sqlExec, "ALTER TABLE "+tableName+" DROP "+v.Column)
+				//}
 
 				for _, v := range sqlExec {
 					db.Session(&gorm.Session{NewDB: true}).Exec(v)
