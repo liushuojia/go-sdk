@@ -1,41 +1,37 @@
 package cmd
 
 import (
-	mysqlConn "github.com/liushuojia/go-sdk/mysql"
-	"github.com/liushuojia/go-sdk/utils"
-	"log"
-	"strings"
 	"testing"
 )
 
 func TestMysql(t *testing.T) {
 	//t.Log("mysql test")
 
-	databaseNew := mysqlConn.NewDatabase().
-		SetHost("127.0.0.1").SetPort(3306).
-		SetUsername("root").SetPassword("liushuojia").
-		SetDatabase("APPUSERDB")
-
-	if err := databaseNew.Get(); err != nil {
-		log.Fatalln("获取新的数据结构失败")
-	}
-
-	databaseOld := mysqlConn.NewDatabase().
-		SetHost("127.0.0.1").SetPort(3306).
-		SetUsername("root").SetPassword("liushuojia").
-		SetDatabase("abc")
-
-	if err := databaseOld.Get(); err != nil {
-		log.Fatalln("获取新的数据结构失败")
-	}
-
-	updateSqlList := mysqlConn.GetUpdateSql(databaseNew, databaseOld)
-
-	writeString := ""
-	if len(updateSqlList) > 0 {
-		writeString += strings.Join(updateSqlList, ";\n\n") + ";"
-	}
-	utils.WriteFile("./update.sql", []byte(writeString))
+	//databaseNew := mysqlConn.NewDatabase().
+	//	SetHost("127.0.0.1").SetPort(3306).
+	//	SetUsername("root").SetPassword("liushuojia").
+	//	SetDatabase("APPUSERDB")
+	//
+	//if err := databaseNew.Get(); err != nil {
+	//	log.Fatalln("获取新的数据结构失败")
+	//}
+	//
+	//databaseOld := mysqlConn.NewDatabase().
+	//	SetHost("127.0.0.1").SetPort(3306).
+	//	SetUsername("root").SetPassword("liushuojia").
+	//	SetDatabase("abc")
+	//
+	//if err := databaseOld.Get(); err != nil {
+	//	log.Fatalln("获取新的数据结构失败")
+	//}
+	//
+	//updateSqlList := mysqlConn.GetUpdateSql(databaseNew, databaseOld)
+	//
+	//writeString := ""
+	//if len(updateSqlList) > 0 {
+	//	writeString += strings.Join(updateSqlList, ";\n\n") + ";"
+	//}
+	//utils.WriteFile("./update.sql", []byte(writeString))
 
 	//mysqlConn.UseDB(db)
 	//fmt.Println((&model.FileDefault{

@@ -16,39 +16,329 @@ import (
 )
 
 var (
-	Q           = new(Query)
-	Admin       *admin
-	CustomInput *customInput
+	Q                        = new(Query)
+	Agreement                *agreement
+	Article                  *article
+	Bank                     *bank
+	BankFlow                 *bankFlow
+	BankPayment              *bankPayment
+	BankPaymentLink          *bankPaymentLink
+	CompanyOpenInvoice       *companyOpenInvoice
+	CompanyQualification     *companyQualification
+	CompanyQualificationsExt *companyQualificationsExt
+	CompanyUser              *companyUser
+	Consultation             *consultation
+	ConsultationExt          *consultationExt
+	CustomInput              *customInput
+	CustomLabel              *customLabel
+	CustomRichText           *customRichText
+	FileDefault              *fileDefault
+	FollowDesc               *followDesc
+	FollowPlan               *followPlan
+	FollowPlanResultLabel    *followPlanResultLabel
+	Gradient                 *gradient
+	GradientPercent          *gradientPercent
+	Invoice                  *invoice
+	InvoiceOpen              *invoiceOpen
+	InvoiceReceived          *invoiceReceived
+	InvoiceReceivedBill      *invoiceReceivedBill
+	InvoiceReceivedItem      *invoiceReceivedItem
+	OrderArchive             *orderArchive
+	OrderArchiveItem         *orderArchiveItem
+	OrderBase                *orderBase
+	OrderCommission          *orderCommission
+	OrderCommissionRule      *orderCommissionRule
+	OrderItem                *orderItem
+	OrderPayment             *orderPayment
+	OurDatum                 *ourDatum
+	PageRole                 *pageRole
+	PageRoleMenu             *pageRoleMenu
+	Payment                  *payment
+	PaymentMerge             *paymentMerge
+	ProcessChild             *processChild
+	ProcessMaster            *processMaster
+	ProcessUse               *processUse
+	ProcessUseChild          *processUseChild
+	ProcessUseMaster         *processUseMaster
+	ProductDefault           *productDefault
+	QueryHistory             *queryHistory
+	QueryList                *queryList
+	QueryListDefault         *queryListDefault
+	QueryListKey             *queryListKey
+	SystemArea               *systemArea
+	SystemAreaType           *systemAreaType
+	User                     *user
+	UserCertificate          *userCertificate
+	UserCheckPower           *userCheckPower
+	UserDepartmentPower      *userDepartmentPower
+	UserExt                  *userExt
+	UserIncallArrivalCity    *userIncallArrivalCity
+	UserLogin                *userLogin
+	UserRoleLink             *userRoleLink
+	UserRolePower            *userRolePower
+	WeixinAccount            *weixinAccount
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
-	Admin = &Q.Admin
+	Agreement = &Q.Agreement
+	Article = &Q.Article
+	Bank = &Q.Bank
+	BankFlow = &Q.BankFlow
+	BankPayment = &Q.BankPayment
+	BankPaymentLink = &Q.BankPaymentLink
+	CompanyOpenInvoice = &Q.CompanyOpenInvoice
+	CompanyQualification = &Q.CompanyQualification
+	CompanyQualificationsExt = &Q.CompanyQualificationsExt
+	CompanyUser = &Q.CompanyUser
+	Consultation = &Q.Consultation
+	ConsultationExt = &Q.ConsultationExt
 	CustomInput = &Q.CustomInput
+	CustomLabel = &Q.CustomLabel
+	CustomRichText = &Q.CustomRichText
+	FileDefault = &Q.FileDefault
+	FollowDesc = &Q.FollowDesc
+	FollowPlan = &Q.FollowPlan
+	FollowPlanResultLabel = &Q.FollowPlanResultLabel
+	Gradient = &Q.Gradient
+	GradientPercent = &Q.GradientPercent
+	Invoice = &Q.Invoice
+	InvoiceOpen = &Q.InvoiceOpen
+	InvoiceReceived = &Q.InvoiceReceived
+	InvoiceReceivedBill = &Q.InvoiceReceivedBill
+	InvoiceReceivedItem = &Q.InvoiceReceivedItem
+	OrderArchive = &Q.OrderArchive
+	OrderArchiveItem = &Q.OrderArchiveItem
+	OrderBase = &Q.OrderBase
+	OrderCommission = &Q.OrderCommission
+	OrderCommissionRule = &Q.OrderCommissionRule
+	OrderItem = &Q.OrderItem
+	OrderPayment = &Q.OrderPayment
+	OurDatum = &Q.OurDatum
+	PageRole = &Q.PageRole
+	PageRoleMenu = &Q.PageRoleMenu
+	Payment = &Q.Payment
+	PaymentMerge = &Q.PaymentMerge
+	ProcessChild = &Q.ProcessChild
+	ProcessMaster = &Q.ProcessMaster
+	ProcessUse = &Q.ProcessUse
+	ProcessUseChild = &Q.ProcessUseChild
+	ProcessUseMaster = &Q.ProcessUseMaster
+	ProductDefault = &Q.ProductDefault
+	QueryHistory = &Q.QueryHistory
+	QueryList = &Q.QueryList
+	QueryListDefault = &Q.QueryListDefault
+	QueryListKey = &Q.QueryListKey
+	SystemArea = &Q.SystemArea
+	SystemAreaType = &Q.SystemAreaType
+	User = &Q.User
+	UserCertificate = &Q.UserCertificate
+	UserCheckPower = &Q.UserCheckPower
+	UserDepartmentPower = &Q.UserDepartmentPower
+	UserExt = &Q.UserExt
+	UserIncallArrivalCity = &Q.UserIncallArrivalCity
+	UserLogin = &Q.UserLogin
+	UserRoleLink = &Q.UserRoleLink
+	UserRolePower = &Q.UserRolePower
+	WeixinAccount = &Q.WeixinAccount
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:          db,
-		Admin:       newAdmin(db, opts...),
-		CustomInput: newCustomInput(db, opts...),
+		db:                       db,
+		Agreement:                newAgreement(db, opts...),
+		Article:                  newArticle(db, opts...),
+		Bank:                     newBank(db, opts...),
+		BankFlow:                 newBankFlow(db, opts...),
+		BankPayment:              newBankPayment(db, opts...),
+		BankPaymentLink:          newBankPaymentLink(db, opts...),
+		CompanyOpenInvoice:       newCompanyOpenInvoice(db, opts...),
+		CompanyQualification:     newCompanyQualification(db, opts...),
+		CompanyQualificationsExt: newCompanyQualificationsExt(db, opts...),
+		CompanyUser:              newCompanyUser(db, opts...),
+		Consultation:             newConsultation(db, opts...),
+		ConsultationExt:          newConsultationExt(db, opts...),
+		CustomInput:              newCustomInput(db, opts...),
+		CustomLabel:              newCustomLabel(db, opts...),
+		CustomRichText:           newCustomRichText(db, opts...),
+		FileDefault:              newFileDefault(db, opts...),
+		FollowDesc:               newFollowDesc(db, opts...),
+		FollowPlan:               newFollowPlan(db, opts...),
+		FollowPlanResultLabel:    newFollowPlanResultLabel(db, opts...),
+		Gradient:                 newGradient(db, opts...),
+		GradientPercent:          newGradientPercent(db, opts...),
+		Invoice:                  newInvoice(db, opts...),
+		InvoiceOpen:              newInvoiceOpen(db, opts...),
+		InvoiceReceived:          newInvoiceReceived(db, opts...),
+		InvoiceReceivedBill:      newInvoiceReceivedBill(db, opts...),
+		InvoiceReceivedItem:      newInvoiceReceivedItem(db, opts...),
+		OrderArchive:             newOrderArchive(db, opts...),
+		OrderArchiveItem:         newOrderArchiveItem(db, opts...),
+		OrderBase:                newOrderBase(db, opts...),
+		OrderCommission:          newOrderCommission(db, opts...),
+		OrderCommissionRule:      newOrderCommissionRule(db, opts...),
+		OrderItem:                newOrderItem(db, opts...),
+		OrderPayment:             newOrderPayment(db, opts...),
+		OurDatum:                 newOurDatum(db, opts...),
+		PageRole:                 newPageRole(db, opts...),
+		PageRoleMenu:             newPageRoleMenu(db, opts...),
+		Payment:                  newPayment(db, opts...),
+		PaymentMerge:             newPaymentMerge(db, opts...),
+		ProcessChild:             newProcessChild(db, opts...),
+		ProcessMaster:            newProcessMaster(db, opts...),
+		ProcessUse:               newProcessUse(db, opts...),
+		ProcessUseChild:          newProcessUseChild(db, opts...),
+		ProcessUseMaster:         newProcessUseMaster(db, opts...),
+		ProductDefault:           newProductDefault(db, opts...),
+		QueryHistory:             newQueryHistory(db, opts...),
+		QueryList:                newQueryList(db, opts...),
+		QueryListDefault:         newQueryListDefault(db, opts...),
+		QueryListKey:             newQueryListKey(db, opts...),
+		SystemArea:               newSystemArea(db, opts...),
+		SystemAreaType:           newSystemAreaType(db, opts...),
+		User:                     newUser(db, opts...),
+		UserCertificate:          newUserCertificate(db, opts...),
+		UserCheckPower:           newUserCheckPower(db, opts...),
+		UserDepartmentPower:      newUserDepartmentPower(db, opts...),
+		UserExt:                  newUserExt(db, opts...),
+		UserIncallArrivalCity:    newUserIncallArrivalCity(db, opts...),
+		UserLogin:                newUserLogin(db, opts...),
+		UserRoleLink:             newUserRoleLink(db, opts...),
+		UserRolePower:            newUserRolePower(db, opts...),
+		WeixinAccount:            newWeixinAccount(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Admin       admin
-	CustomInput customInput
+	Agreement                agreement
+	Article                  article
+	Bank                     bank
+	BankFlow                 bankFlow
+	BankPayment              bankPayment
+	BankPaymentLink          bankPaymentLink
+	CompanyOpenInvoice       companyOpenInvoice
+	CompanyQualification     companyQualification
+	CompanyQualificationsExt companyQualificationsExt
+	CompanyUser              companyUser
+	Consultation             consultation
+	ConsultationExt          consultationExt
+	CustomInput              customInput
+	CustomLabel              customLabel
+	CustomRichText           customRichText
+	FileDefault              fileDefault
+	FollowDesc               followDesc
+	FollowPlan               followPlan
+	FollowPlanResultLabel    followPlanResultLabel
+	Gradient                 gradient
+	GradientPercent          gradientPercent
+	Invoice                  invoice
+	InvoiceOpen              invoiceOpen
+	InvoiceReceived          invoiceReceived
+	InvoiceReceivedBill      invoiceReceivedBill
+	InvoiceReceivedItem      invoiceReceivedItem
+	OrderArchive             orderArchive
+	OrderArchiveItem         orderArchiveItem
+	OrderBase                orderBase
+	OrderCommission          orderCommission
+	OrderCommissionRule      orderCommissionRule
+	OrderItem                orderItem
+	OrderPayment             orderPayment
+	OurDatum                 ourDatum
+	PageRole                 pageRole
+	PageRoleMenu             pageRoleMenu
+	Payment                  payment
+	PaymentMerge             paymentMerge
+	ProcessChild             processChild
+	ProcessMaster            processMaster
+	ProcessUse               processUse
+	ProcessUseChild          processUseChild
+	ProcessUseMaster         processUseMaster
+	ProductDefault           productDefault
+	QueryHistory             queryHistory
+	QueryList                queryList
+	QueryListDefault         queryListDefault
+	QueryListKey             queryListKey
+	SystemArea               systemArea
+	SystemAreaType           systemAreaType
+	User                     user
+	UserCertificate          userCertificate
+	UserCheckPower           userCheckPower
+	UserDepartmentPower      userDepartmentPower
+	UserExt                  userExt
+	UserIncallArrivalCity    userIncallArrivalCity
+	UserLogin                userLogin
+	UserRoleLink             userRoleLink
+	UserRolePower            userRolePower
+	WeixinAccount            weixinAccount
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:          db,
-		Admin:       q.Admin.clone(db),
-		CustomInput: q.CustomInput.clone(db),
+		db:                       db,
+		Agreement:                q.Agreement.clone(db),
+		Article:                  q.Article.clone(db),
+		Bank:                     q.Bank.clone(db),
+		BankFlow:                 q.BankFlow.clone(db),
+		BankPayment:              q.BankPayment.clone(db),
+		BankPaymentLink:          q.BankPaymentLink.clone(db),
+		CompanyOpenInvoice:       q.CompanyOpenInvoice.clone(db),
+		CompanyQualification:     q.CompanyQualification.clone(db),
+		CompanyQualificationsExt: q.CompanyQualificationsExt.clone(db),
+		CompanyUser:              q.CompanyUser.clone(db),
+		Consultation:             q.Consultation.clone(db),
+		ConsultationExt:          q.ConsultationExt.clone(db),
+		CustomInput:              q.CustomInput.clone(db),
+		CustomLabel:              q.CustomLabel.clone(db),
+		CustomRichText:           q.CustomRichText.clone(db),
+		FileDefault:              q.FileDefault.clone(db),
+		FollowDesc:               q.FollowDesc.clone(db),
+		FollowPlan:               q.FollowPlan.clone(db),
+		FollowPlanResultLabel:    q.FollowPlanResultLabel.clone(db),
+		Gradient:                 q.Gradient.clone(db),
+		GradientPercent:          q.GradientPercent.clone(db),
+		Invoice:                  q.Invoice.clone(db),
+		InvoiceOpen:              q.InvoiceOpen.clone(db),
+		InvoiceReceived:          q.InvoiceReceived.clone(db),
+		InvoiceReceivedBill:      q.InvoiceReceivedBill.clone(db),
+		InvoiceReceivedItem:      q.InvoiceReceivedItem.clone(db),
+		OrderArchive:             q.OrderArchive.clone(db),
+		OrderArchiveItem:         q.OrderArchiveItem.clone(db),
+		OrderBase:                q.OrderBase.clone(db),
+		OrderCommission:          q.OrderCommission.clone(db),
+		OrderCommissionRule:      q.OrderCommissionRule.clone(db),
+		OrderItem:                q.OrderItem.clone(db),
+		OrderPayment:             q.OrderPayment.clone(db),
+		OurDatum:                 q.OurDatum.clone(db),
+		PageRole:                 q.PageRole.clone(db),
+		PageRoleMenu:             q.PageRoleMenu.clone(db),
+		Payment:                  q.Payment.clone(db),
+		PaymentMerge:             q.PaymentMerge.clone(db),
+		ProcessChild:             q.ProcessChild.clone(db),
+		ProcessMaster:            q.ProcessMaster.clone(db),
+		ProcessUse:               q.ProcessUse.clone(db),
+		ProcessUseChild:          q.ProcessUseChild.clone(db),
+		ProcessUseMaster:         q.ProcessUseMaster.clone(db),
+		ProductDefault:           q.ProductDefault.clone(db),
+		QueryHistory:             q.QueryHistory.clone(db),
+		QueryList:                q.QueryList.clone(db),
+		QueryListDefault:         q.QueryListDefault.clone(db),
+		QueryListKey:             q.QueryListKey.clone(db),
+		SystemArea:               q.SystemArea.clone(db),
+		SystemAreaType:           q.SystemAreaType.clone(db),
+		User:                     q.User.clone(db),
+		UserCertificate:          q.UserCertificate.clone(db),
+		UserCheckPower:           q.UserCheckPower.clone(db),
+		UserDepartmentPower:      q.UserDepartmentPower.clone(db),
+		UserExt:                  q.UserExt.clone(db),
+		UserIncallArrivalCity:    q.UserIncallArrivalCity.clone(db),
+		UserLogin:                q.UserLogin.clone(db),
+		UserRoleLink:             q.UserRoleLink.clone(db),
+		UserRolePower:            q.UserRolePower.clone(db),
+		WeixinAccount:            q.WeixinAccount.clone(db),
 	}
 }
 
@@ -62,21 +352,195 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:          db,
-		Admin:       q.Admin.replaceDB(db),
-		CustomInput: q.CustomInput.replaceDB(db),
+		db:                       db,
+		Agreement:                q.Agreement.replaceDB(db),
+		Article:                  q.Article.replaceDB(db),
+		Bank:                     q.Bank.replaceDB(db),
+		BankFlow:                 q.BankFlow.replaceDB(db),
+		BankPayment:              q.BankPayment.replaceDB(db),
+		BankPaymentLink:          q.BankPaymentLink.replaceDB(db),
+		CompanyOpenInvoice:       q.CompanyOpenInvoice.replaceDB(db),
+		CompanyQualification:     q.CompanyQualification.replaceDB(db),
+		CompanyQualificationsExt: q.CompanyQualificationsExt.replaceDB(db),
+		CompanyUser:              q.CompanyUser.replaceDB(db),
+		Consultation:             q.Consultation.replaceDB(db),
+		ConsultationExt:          q.ConsultationExt.replaceDB(db),
+		CustomInput:              q.CustomInput.replaceDB(db),
+		CustomLabel:              q.CustomLabel.replaceDB(db),
+		CustomRichText:           q.CustomRichText.replaceDB(db),
+		FileDefault:              q.FileDefault.replaceDB(db),
+		FollowDesc:               q.FollowDesc.replaceDB(db),
+		FollowPlan:               q.FollowPlan.replaceDB(db),
+		FollowPlanResultLabel:    q.FollowPlanResultLabel.replaceDB(db),
+		Gradient:                 q.Gradient.replaceDB(db),
+		GradientPercent:          q.GradientPercent.replaceDB(db),
+		Invoice:                  q.Invoice.replaceDB(db),
+		InvoiceOpen:              q.InvoiceOpen.replaceDB(db),
+		InvoiceReceived:          q.InvoiceReceived.replaceDB(db),
+		InvoiceReceivedBill:      q.InvoiceReceivedBill.replaceDB(db),
+		InvoiceReceivedItem:      q.InvoiceReceivedItem.replaceDB(db),
+		OrderArchive:             q.OrderArchive.replaceDB(db),
+		OrderArchiveItem:         q.OrderArchiveItem.replaceDB(db),
+		OrderBase:                q.OrderBase.replaceDB(db),
+		OrderCommission:          q.OrderCommission.replaceDB(db),
+		OrderCommissionRule:      q.OrderCommissionRule.replaceDB(db),
+		OrderItem:                q.OrderItem.replaceDB(db),
+		OrderPayment:             q.OrderPayment.replaceDB(db),
+		OurDatum:                 q.OurDatum.replaceDB(db),
+		PageRole:                 q.PageRole.replaceDB(db),
+		PageRoleMenu:             q.PageRoleMenu.replaceDB(db),
+		Payment:                  q.Payment.replaceDB(db),
+		PaymentMerge:             q.PaymentMerge.replaceDB(db),
+		ProcessChild:             q.ProcessChild.replaceDB(db),
+		ProcessMaster:            q.ProcessMaster.replaceDB(db),
+		ProcessUse:               q.ProcessUse.replaceDB(db),
+		ProcessUseChild:          q.ProcessUseChild.replaceDB(db),
+		ProcessUseMaster:         q.ProcessUseMaster.replaceDB(db),
+		ProductDefault:           q.ProductDefault.replaceDB(db),
+		QueryHistory:             q.QueryHistory.replaceDB(db),
+		QueryList:                q.QueryList.replaceDB(db),
+		QueryListDefault:         q.QueryListDefault.replaceDB(db),
+		QueryListKey:             q.QueryListKey.replaceDB(db),
+		SystemArea:               q.SystemArea.replaceDB(db),
+		SystemAreaType:           q.SystemAreaType.replaceDB(db),
+		User:                     q.User.replaceDB(db),
+		UserCertificate:          q.UserCertificate.replaceDB(db),
+		UserCheckPower:           q.UserCheckPower.replaceDB(db),
+		UserDepartmentPower:      q.UserDepartmentPower.replaceDB(db),
+		UserExt:                  q.UserExt.replaceDB(db),
+		UserIncallArrivalCity:    q.UserIncallArrivalCity.replaceDB(db),
+		UserLogin:                q.UserLogin.replaceDB(db),
+		UserRoleLink:             q.UserRoleLink.replaceDB(db),
+		UserRolePower:            q.UserRolePower.replaceDB(db),
+		WeixinAccount:            q.WeixinAccount.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Admin       *adminDo
-	CustomInput *customInputDo
+	Agreement                *agreementDo
+	Article                  *articleDo
+	Bank                     *bankDo
+	BankFlow                 *bankFlowDo
+	BankPayment              *bankPaymentDo
+	BankPaymentLink          *bankPaymentLinkDo
+	CompanyOpenInvoice       *companyOpenInvoiceDo
+	CompanyQualification     *companyQualificationDo
+	CompanyQualificationsExt *companyQualificationsExtDo
+	CompanyUser              *companyUserDo
+	Consultation             *consultationDo
+	ConsultationExt          *consultationExtDo
+	CustomInput              *customInputDo
+	CustomLabel              *customLabelDo
+	CustomRichText           *customRichTextDo
+	FileDefault              *fileDefaultDo
+	FollowDesc               *followDescDo
+	FollowPlan               *followPlanDo
+	FollowPlanResultLabel    *followPlanResultLabelDo
+	Gradient                 *gradientDo
+	GradientPercent          *gradientPercentDo
+	Invoice                  *invoiceDo
+	InvoiceOpen              *invoiceOpenDo
+	InvoiceReceived          *invoiceReceivedDo
+	InvoiceReceivedBill      *invoiceReceivedBillDo
+	InvoiceReceivedItem      *invoiceReceivedItemDo
+	OrderArchive             *orderArchiveDo
+	OrderArchiveItem         *orderArchiveItemDo
+	OrderBase                *orderBaseDo
+	OrderCommission          *orderCommissionDo
+	OrderCommissionRule      *orderCommissionRuleDo
+	OrderItem                *orderItemDo
+	OrderPayment             *orderPaymentDo
+	OurDatum                 *ourDatumDo
+	PageRole                 *pageRoleDo
+	PageRoleMenu             *pageRoleMenuDo
+	Payment                  *paymentDo
+	PaymentMerge             *paymentMergeDo
+	ProcessChild             *processChildDo
+	ProcessMaster            *processMasterDo
+	ProcessUse               *processUseDo
+	ProcessUseChild          *processUseChildDo
+	ProcessUseMaster         *processUseMasterDo
+	ProductDefault           *productDefaultDo
+	QueryHistory             *queryHistoryDo
+	QueryList                *queryListDo
+	QueryListDefault         *queryListDefaultDo
+	QueryListKey             *queryListKeyDo
+	SystemArea               *systemAreaDo
+	SystemAreaType           *systemAreaTypeDo
+	User                     *userDo
+	UserCertificate          *userCertificateDo
+	UserCheckPower           *userCheckPowerDo
+	UserDepartmentPower      *userDepartmentPowerDo
+	UserExt                  *userExtDo
+	UserIncallArrivalCity    *userIncallArrivalCityDo
+	UserLogin                *userLoginDo
+	UserRoleLink             *userRoleLinkDo
+	UserRolePower            *userRolePowerDo
+	WeixinAccount            *weixinAccountDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Admin:       q.Admin.WithContext(ctx),
-		CustomInput: q.CustomInput.WithContext(ctx),
+		Agreement:                q.Agreement.WithContext(ctx),
+		Article:                  q.Article.WithContext(ctx),
+		Bank:                     q.Bank.WithContext(ctx),
+		BankFlow:                 q.BankFlow.WithContext(ctx),
+		BankPayment:              q.BankPayment.WithContext(ctx),
+		BankPaymentLink:          q.BankPaymentLink.WithContext(ctx),
+		CompanyOpenInvoice:       q.CompanyOpenInvoice.WithContext(ctx),
+		CompanyQualification:     q.CompanyQualification.WithContext(ctx),
+		CompanyQualificationsExt: q.CompanyQualificationsExt.WithContext(ctx),
+		CompanyUser:              q.CompanyUser.WithContext(ctx),
+		Consultation:             q.Consultation.WithContext(ctx),
+		ConsultationExt:          q.ConsultationExt.WithContext(ctx),
+		CustomInput:              q.CustomInput.WithContext(ctx),
+		CustomLabel:              q.CustomLabel.WithContext(ctx),
+		CustomRichText:           q.CustomRichText.WithContext(ctx),
+		FileDefault:              q.FileDefault.WithContext(ctx),
+		FollowDesc:               q.FollowDesc.WithContext(ctx),
+		FollowPlan:               q.FollowPlan.WithContext(ctx),
+		FollowPlanResultLabel:    q.FollowPlanResultLabel.WithContext(ctx),
+		Gradient:                 q.Gradient.WithContext(ctx),
+		GradientPercent:          q.GradientPercent.WithContext(ctx),
+		Invoice:                  q.Invoice.WithContext(ctx),
+		InvoiceOpen:              q.InvoiceOpen.WithContext(ctx),
+		InvoiceReceived:          q.InvoiceReceived.WithContext(ctx),
+		InvoiceReceivedBill:      q.InvoiceReceivedBill.WithContext(ctx),
+		InvoiceReceivedItem:      q.InvoiceReceivedItem.WithContext(ctx),
+		OrderArchive:             q.OrderArchive.WithContext(ctx),
+		OrderArchiveItem:         q.OrderArchiveItem.WithContext(ctx),
+		OrderBase:                q.OrderBase.WithContext(ctx),
+		OrderCommission:          q.OrderCommission.WithContext(ctx),
+		OrderCommissionRule:      q.OrderCommissionRule.WithContext(ctx),
+		OrderItem:                q.OrderItem.WithContext(ctx),
+		OrderPayment:             q.OrderPayment.WithContext(ctx),
+		OurDatum:                 q.OurDatum.WithContext(ctx),
+		PageRole:                 q.PageRole.WithContext(ctx),
+		PageRoleMenu:             q.PageRoleMenu.WithContext(ctx),
+		Payment:                  q.Payment.WithContext(ctx),
+		PaymentMerge:             q.PaymentMerge.WithContext(ctx),
+		ProcessChild:             q.ProcessChild.WithContext(ctx),
+		ProcessMaster:            q.ProcessMaster.WithContext(ctx),
+		ProcessUse:               q.ProcessUse.WithContext(ctx),
+		ProcessUseChild:          q.ProcessUseChild.WithContext(ctx),
+		ProcessUseMaster:         q.ProcessUseMaster.WithContext(ctx),
+		ProductDefault:           q.ProductDefault.WithContext(ctx),
+		QueryHistory:             q.QueryHistory.WithContext(ctx),
+		QueryList:                q.QueryList.WithContext(ctx),
+		QueryListDefault:         q.QueryListDefault.WithContext(ctx),
+		QueryListKey:             q.QueryListKey.WithContext(ctx),
+		SystemArea:               q.SystemArea.WithContext(ctx),
+		SystemAreaType:           q.SystemAreaType.WithContext(ctx),
+		User:                     q.User.WithContext(ctx),
+		UserCertificate:          q.UserCertificate.WithContext(ctx),
+		UserCheckPower:           q.UserCheckPower.WithContext(ctx),
+		UserDepartmentPower:      q.UserDepartmentPower.WithContext(ctx),
+		UserExt:                  q.UserExt.WithContext(ctx),
+		UserIncallArrivalCity:    q.UserIncallArrivalCity.WithContext(ctx),
+		UserLogin:                q.UserLogin.WithContext(ctx),
+		UserRoleLink:             q.UserRoleLink.WithContext(ctx),
+		UserRolePower:            q.UserRolePower.WithContext(ctx),
+		WeixinAccount:            q.WeixinAccount.WithContext(ctx),
 	}
 }
 

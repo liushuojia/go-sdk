@@ -14,15 +14,15 @@ const TableNameCustomInput = "customInput"
 
 // CustomInput mapped from table <customInput>
 type CustomInput struct {
-	ID         int64          `gorm:"column:id;primaryKey;autoIncrement:true;comment:自动编号" json:"id"`
-	CreatedAt  time.Time      `gorm:"column:created_at;not null;default:CURRENT_TIMESTAMP;comment:创建时间" json:"created_at"`
-	UpdatedAt  time.Time      `gorm:"column:updated_at;not null;comment:更新时间" json:"updated_at"`
-	DeletedAt  gorm.DeletedAt `gorm:"column:deleted_at;not null;comment:删除时间" json:"deleted_at"`
-	DataCode   string         `gorm:"column:data_code;not null;comment:业务所属编码" json:"data_code"`
-	DataType   int64          `gorm:"column:data_type;not null;comment:业务所属类型id" json:"data_type"`
-	DataID     int64          `gorm:"column:data_id;not null;comment:业务所属自增id" json:"data_id"`
-	InputKey   string         `gorm:"column:input_key;not null;comment:输入框KEY" json:"input_key"`
-	InputValue string         `gorm:"column:input_value;not null;comment:输入框VALUE" json:"input_value"`
+	ID         int64          `gorm:"column:id;primaryKey;autoIncrement:true;comment:自动编号" json:"id"`  // 自动编号
+	CreatedAt  time.Time      `gorm:"column:created_at;comment:创建时间" json:"created_at"`                // 创建时间
+	UpdatedAt  time.Time      `gorm:"column:updated_at;comment:更新时间" json:"updated_at"`                // 更新时间
+	DeletedAt  gorm.DeletedAt `gorm:"column:deleted_at;comment:删除时间" json:"deleted_at"`                // 删除时间
+	DataCode   string         `gorm:"column:data_code;not null;comment:业务所属编码" json:"data_code"`       // 业务所属编码
+	DataType   int64          `gorm:"column:data_type;not null;comment:业务所属类型id" json:"data_type"`     // 业务所属类型id
+	DataID     int64          `gorm:"column:data_id;not null;comment:业务所属自增id" json:"data_id"`         // 业务所属自增id
+	InputKey   string         `gorm:"column:input_key;not null;comment:输入框KEY" json:"input_key"`       // 输入框KEY
+	InputValue string         `gorm:"column:input_value;not null;comment:输入框VALUE" json:"input_value"` // 输入框VALUE
 }
 
 func (m *CustomInput) IsEmpty() bool {

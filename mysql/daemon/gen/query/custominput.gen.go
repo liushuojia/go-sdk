@@ -164,10 +164,6 @@ func (c customInputDo) Where(conds ...gen.Condition) *customInputDo {
 	return c.withDO(c.DO.Where(conds...))
 }
 
-func (c customInputDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *customInputDo {
-	return c.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (c customInputDo) Order(conds ...field.Expr) *customInputDo {
 	return c.withDO(c.DO.Order(conds...))
 }
