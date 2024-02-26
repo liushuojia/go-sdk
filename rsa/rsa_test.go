@@ -7,7 +7,7 @@ import (
 )
 
 // 目录下 go test
-func TestRedis(t *testing.T) {
+func TestRsa(t *testing.T) {
 	t.Log("rsa test")
 	var (
 		s   []byte

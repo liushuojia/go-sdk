@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-// 目录下 go test
-func TestHelloWorld(t *testing.T) {
+// go test run TestDraw
+func TestDraw(t *testing.T) {
 	t.Log("draw")
 
 	srcFile, err := os.Create("./new_os.png")

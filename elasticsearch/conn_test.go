@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestMysql(t *testing.T) {
+func TestES(t *testing.T) {
 
 	es := New().SetAddresses("http://127.0.0.1:9200")
 	if err := es.Connect(); err != nil {

@@ -1,18 +1,14 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/liushuojia/go-sdk/example/model"
 	"github.com/liushuojia/go-sdk/example/query"
 	GIN "github.com/liushuojia/go-sdk/gin"
 	mysqlConn "github.com/liushuojia/go-sdk/mysql"
 	tokenConn "github.com/liushuojia/go-sdk/token"
 	websocketConn "github.com/liushuojia/go-sdk/websocket"
-	"gorm.io/gorm"
 	"log"
-	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -80,144 +76,144 @@ func main() {
 	}
 
 	//u := router.Group("user",Auth())
-	u := router.Group("user", Auth())
-	{
-		u.GET("", func(c *gin.Context) {
-			user := query.User
-
-			q := GIN.New().Gin(c).
-				Eq(user.Name, "name").
-				EqInt64(user.ID, "id").
-				LikeArray(user.Name, "name")
-
-			userList, totalSize, err := user.Where(q.Build()...).FindByPage((q.GetPage()-1)*q.GetPageSize(), q.GetPageSize())
-
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, err)
-				return
-			}
-
-			c.JSON(http.StatusOK, gin.H{
-				"page": gin.H{
-					"page":      q.GetPage(),
-					"pageSize":  q.GetPageSize(),
-					"totalSize": totalSize,
-					"totalPage": int64(math.Ceil(float64(totalSize) / float64(q.GetPageSize()))),
-				},
-				"data": userList,
-			})
-		})
-
-		u.POST("", func(c *gin.Context) {
-			var userCreate model.User
-			if _, err := GIN.Body(c, &userCreate); err != nil {
-				c.JSON(http.StatusInternalServerError, err)
-				return
-			}
-			user := query.User
-
-			if err := user.Create(&userCreate); err != nil {
-				c.JSON(http.StatusInternalServerError, err)
-				return
-			}
-
-			c.JSON(http.StatusOK, userCreate.ID)
-		})
-
-		u.GET(":id", func(c *gin.Context) {
-			id, err := GIN.ParamInt64(c, "id")
-			if err != nil {
-				c.JSON(http.StatusBadRequest, err)
-				return
-			}
-
-			userSelect, err := query.User.Where(query.User.ID.Eq(id)).First()
-			if err != nil {
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					c.JSON(http.StatusNotFound, err)
-					return
-				}
-				c.JSON(http.StatusInternalServerError, err)
-				return
-			}
-
-			c.JSON(http.StatusOK, userSelect)
-		})
-
-		u.PUT(":id", func(c *gin.Context) {
-			id, err := GIN.ParamInt64(c, "id")
-			if err != nil {
-				c.JSON(http.StatusBadRequest, err)
-				return
-			}
-
-			var updateMap map[string]interface{}
-			if _, err := GIN.Body(c, &updateMap); err != nil {
-				c.JSON(http.StatusBadRequest, err)
-				return
-			}
-
-			if v, ok := updateMap["name"]; ok {
-				value, ok := v.(string)
-				if !ok {
-					c.JSON(http.StatusBadRequest, "姓名非字符串")
-					return
-				}
-				if value == "" {
-					c.JSON(http.StatusBadRequest, "姓名内容不为空")
-					return
-				}
-			}
-
-			userSelect, err := query.User.Where(query.User.ID.Eq(id)).First()
-			if err != nil {
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					c.JSON(http.StatusNotFound, err)
-					return
-				}
-				c.JSON(http.StatusInternalServerError, err)
-				return
-			}
-
-			if err := mysqlConn.InitUpdateMap(userSelect, updateMap); err != nil || len(updateMap) <= 0 {
-				c.JSON(http.StatusInternalServerError, "无更新内容")
-				return
-			}
-
-			r, err := query.User.Where(query.User.ID.Eq(id)).Updates(updateMap)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, err)
-				return
-			}
-
-			c.JSON(http.StatusOK, r)
-		})
-
-		u.DELETE(":id", func(c *gin.Context) {
-			id, err := GIN.ParamInt64(c, "id")
-			if err != nil {
-				c.JSON(http.StatusBadRequest, err)
-				return
-			}
-
-			if _, err := query.User.Where(query.User.ID.Eq(id)).First(); err != nil {
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					c.JSON(http.StatusNotFound, err)
-					return
-				}
-				c.JSON(http.StatusInternalServerError, err)
-				return
-			}
-
-			r, err := query.User.Where(query.User.ID.Eq(id)).Delete()
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, err)
-				return
-			}
-
-			c.JSON(http.StatusOK, r)
-		})
-	}
+	//u := router.Group("user", Auth())
+	//{
+	//	u.GET("", func(c *gin.Context) {
+	//		user := query.User
+	//
+	//		q := GIN.New().Gin(c).
+	//			Eq(user.Name, "name").
+	//			EqInt64(user.ID, "id").
+	//			LikeArray(user.Name, "name")
+	//
+	//		userList, totalSize, err := user.Where(q.Build()...).FindByPage((q.GetPage()-1)*q.GetPageSize(), q.GetPageSize())
+	//
+	//		if err != nil {
+	//			c.JSON(http.StatusInternalServerError, err)
+	//			return
+	//		}
+	//
+	//		c.JSON(http.StatusOK, gin.H{
+	//			"page": gin.H{
+	//				"page":      q.GetPage(),
+	//				"pageSize":  q.GetPageSize(),
+	//				"totalSize": totalSize,
+	//				"totalPage": int64(math.Ceil(float64(totalSize) / float64(q.GetPageSize()))),
+	//			},
+	//			"data": userList,
+	//		})
+	//	})
+	//
+	//	u.POST("", func(c *gin.Context) {
+	//		var userCreate model.User
+	//		if _, err := GIN.Body(c, &userCreate); err != nil {
+	//			c.JSON(http.StatusInternalServerError, err)
+	//			return
+	//		}
+	//		user := query.User
+	//
+	//		if err := user.Create(&userCreate); err != nil {
+	//			c.JSON(http.StatusInternalServerError, err)
+	//			return
+	//		}
+	//
+	//		c.JSON(http.StatusOK, userCreate.ID)
+	//	})
+	//
+	//	u.GET(":id", func(c *gin.Context) {
+	//		id, err := GIN.ParamInt64(c, "id")
+	//		if err != nil {
+	//			c.JSON(http.StatusBadRequest, err)
+	//			return
+	//		}
+	//
+	//		userSelect, err := query.User.Where(query.User.ID.Eq(id)).First()
+	//		if err != nil {
+	//			if errors.Is(err, gorm.ErrRecordNotFound) {
+	//				c.JSON(http.StatusNotFound, err)
+	//				return
+	//			}
+	//			c.JSON(http.StatusInternalServerError, err)
+	//			return
+	//		}
+	//
+	//		c.JSON(http.StatusOK, userSelect)
+	//	})
+	//
+	//	u.PUT(":id", func(c *gin.Context) {
+	//		id, err := GIN.ParamInt64(c, "id")
+	//		if err != nil {
+	//			c.JSON(http.StatusBadRequest, err)
+	//			return
+	//		}
+	//
+	//		var updateMap map[string]interface{}
+	//		if _, err := GIN.Body(c, &updateMap); err != nil {
+	//			c.JSON(http.StatusBadRequest, err)
+	//			return
+	//		}
+	//
+	//		if v, ok := updateMap["name"]; ok {
+	//			value, ok := v.(string)
+	//			if !ok {
+	//				c.JSON(http.StatusBadRequest, "姓名非字符串")
+	//				return
+	//			}
+	//			if value == "" {
+	//				c.JSON(http.StatusBadRequest, "姓名内容不为空")
+	//				return
+	//			}
+	//		}
+	//
+	//		userSelect, err := query.User.Where(query.User.ID.Eq(id)).First()
+	//		if err != nil {
+	//			if errors.Is(err, gorm.ErrRecordNotFound) {
+	//				c.JSON(http.StatusNotFound, err)
+	//				return
+	//			}
+	//			c.JSON(http.StatusInternalServerError, err)
+	//			return
+	//		}
+	//
+	//		if err := mysqlConn.InitUpdateMap(userSelect, updateMap); err != nil || len(updateMap) <= 0 {
+	//			c.JSON(http.StatusInternalServerError, "无更新内容")
+	//			return
+	//		}
+	//
+	//		r, err := query.User.Where(query.User.ID.Eq(id)).Updates(updateMap)
+	//		if err != nil {
+	//			c.JSON(http.StatusInternalServerError, err)
+	//			return
+	//		}
+	//
+	//		c.JSON(http.StatusOK, r)
+	//	})
+	//
+	//	u.DELETE(":id", func(c *gin.Context) {
+	//		id, err := GIN.ParamInt64(c, "id")
+	//		if err != nil {
+	//			c.JSON(http.StatusBadRequest, err)
+	//			return
+	//		}
+	//
+	//		if _, err := query.User.Where(query.User.ID.Eq(id)).First(); err != nil {
+	//			if errors.Is(err, gorm.ErrRecordNotFound) {
+	//				c.JSON(http.StatusNotFound, err)
+	//				return
+	//			}
+	//			c.JSON(http.StatusInternalServerError, err)
+	//			return
+	//		}
+	//
+	//		r, err := query.User.Where(query.User.ID.Eq(id)).Delete()
+	//		if err != nil {
+	//			c.JSON(http.StatusInternalServerError, err)
+	//			return
+	//		}
+	//
+	//		c.JSON(http.StatusOK, r)
+	//	})
+	//}
 
 	ws := router.Group("ws", Auth())
 	{
