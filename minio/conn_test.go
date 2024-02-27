@@ -2,7 +2,6 @@ package minioConn
 
 import (
 	"fmt"
-	"log"
 	"testing"
 	"time"
 )
@@ -12,11 +11,7 @@ func TestMinio(t *testing.T) {
 	m := New().SetAddresses("localhost:9000").
 		SetAccessKey("wtXQGX8jOXQ0r3wMpf4Q").
 		SetSecretKey("LmOTOUDJJuetuKzctlO0x4dRrRVWvz7RGz8A51cV").
-		SetUseSSL(false)
-
-	if err := m.Connect(); err != nil {
-		log.Fatalln(err)
-	}
+		SetUseSSL(false).Connect()
 
 	bucketName := "test"
 	objectName := "2.jpg"

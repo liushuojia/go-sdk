@@ -86,26 +86,23 @@ func (c *Conn) SetRequestParams(reqParams url.Values) *Conn {
 	return c
 }
 
-func (c *Conn) Connect() error {
+func (c *Conn) Connect() *Conn {
 	log.Println("[minio]", "connect minio")
 
 	// Initialize minio client object.
-	minioClient, err := minio.New(c.addresses, &minio.Options{
+	minioClient, _ := minio.New(c.addresses, &minio.Options{
 		Creds:  credentials.NewStaticV4(c.accessKey, c.secretKey, ""),
 		Secure: c.useSSL,
 	})
-	if err != nil {
-		log.Fatalln(err)
-	}
 	c.client = minioClient
-	return nil
+	return c
 }
 func (c *Conn) Client() *minio.Client {
-	return c.client
+	return c.Connect().client
 }
 
 func (c *Conn) ListBuckets() ([]minio.BucketInfo, error) {
-	return c.client.ListBuckets(c.ctx)
+	return c.Client().ListBuckets(c.ctx)
 }
 func (c *Conn) MakeBucket(bucketName string) (err error) {
 	// 创建这个bucket
@@ -116,17 +113,17 @@ func (c *Conn) MakeBucket(bucketName string) (err error) {
 	if f == true {
 		return errors.New("bucket exists")
 	}
-	return c.client.MakeBucket(c.ctx, bucketName, c.makeBucketOptions)
+	return c.Client().MakeBucket(c.ctx, bucketName, c.makeBucketOptions)
 }
 func (c *Conn) BucketExists(bucketName string) (bool, error) {
-	return c.client.BucketExists(c.ctx, bucketName)
+	return c.Client().BucketExists(c.ctx, bucketName)
 }
 func (c *Conn) RemoveBucket(bucketName string) error {
-	return c.client.RemoveBucket(c.ctx, bucketName)
+	return c.Client().RemoveBucket(c.ctx, bucketName)
 }
 
 func (c *Conn) ListObjects(bucketName string) <-chan minio.ObjectInfo {
-	return c.client.ListObjects(c.ctx, bucketName, c.listObjectsOptions)
+	return c.Client().ListObjects(c.ctx, bucketName, c.listObjectsOptions)
 }
 
 func (c *Conn) SetBucketTagging(bucketName string, tagMap map[string]string) (err error) {
@@ -134,29 +131,29 @@ func (c *Conn) SetBucketTagging(bucketName string, tagMap map[string]string) (er
 	if err != nil {
 		return err
 	}
-	return c.client.SetBucketTagging(c.ctx, bucketName, tagData)
+	return c.Client().SetBucketTagging(c.ctx, bucketName, tagData)
 }
 func (c *Conn) GetBucketTagging(bucketName string) (map[string]string, error) {
-	tagData, err := c.client.GetBucketTagging(c.ctx, bucketName)
+	tagData, err := c.Client().GetBucketTagging(c.ctx, bucketName)
 	if err != nil {
 		return nil, err
 	}
 	return tagData.ToMap(), nil
 }
 func (c *Conn) RemoveBucketTagging(bucketName string) error {
-	return c.client.RemoveBucketTagging(c.ctx, bucketName)
+	return c.Client().RemoveBucketTagging(c.ctx, bucketName)
 }
 
 // ListIncompleteUploads(ctx context.Context, bucketName, prefix string, recursive bool) <- chan ObjectMultipartInfo
 
 func (c *Conn) StatObject(bucketName string, objectName string) (minio.ObjectInfo, error) {
-	return c.client.StatObject(c.ctx, bucketName, objectName, c.statObjectOptions)
+	return c.Client().StatObject(c.ctx, bucketName, objectName, c.statObjectOptions)
 }
 func (c *Conn) GetObject(bucketName string, objectName string) (*minio.Object, error) {
-	return c.client.GetObject(c.ctx, bucketName, objectName, c.getObjectOptions)
+	return c.Client().GetObject(c.ctx, bucketName, objectName, c.getObjectOptions)
 }
 func (c *Conn) GetObjectContent(bucketName string, objectName string) ([]byte, error) {
-	object, err := c.client.GetObject(c.ctx, bucketName, objectName, c.getObjectOptions)
+	object, err := c.Client().GetObject(c.ctx, bucketName, objectName, c.getObjectOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +172,7 @@ func (c *Conn) GetObjectContent(bucketName string, objectName string) ([]byte, e
 	return io.ReadAll(object)
 }
 func (c *Conn) FGetObject(bucketName string, objectName string, savePath string) error {
-	return c.client.FGetObject(c.ctx, bucketName, objectName, savePath, c.getObjectOptions)
+	return c.Client().FGetObject(c.ctx, bucketName, objectName, savePath, c.getObjectOptions)
 }
 func (c *Conn) PutObject(bucketName string, objectName string, filePath string) (info minio.UploadInfo, err error) {
 	fileInfo, err := os.Stat(filePath)
@@ -187,10 +184,10 @@ func (c *Conn) PutObject(bucketName string, objectName string, filePath string) 
 		return
 	}
 	c.putObjectOptions.ContentType, _ = utils.GetContentType(filePath)
-	return c.client.PutObject(c.ctx, bucketName, objectName, f, fileInfo.Size(), c.putObjectOptions)
+	return c.Client().PutObject(c.ctx, bucketName, objectName, f, fileInfo.Size(), c.putObjectOptions)
 }
 func (c *Conn) FPutObject(bucketName string, objectName string, filePath string) (info minio.UploadInfo, err error) {
-	return c.client.FPutObject(c.ctx, bucketName, objectName, filePath, c.putObjectOptions)
+	return c.Client().FPutObject(c.ctx, bucketName, objectName, filePath, c.putObjectOptions)
 }
 func (c *Conn) CopyObjects(srcBucketName, srcObjectName, dstBucketName, dstObjectName string) (info minio.UploadInfo, err error) {
 	srcOpts := minio.CopySrcOptions{
@@ -205,7 +202,7 @@ func (c *Conn) CopyObjects(srcBucketName, srcObjectName, dstBucketName, dstObjec
 	}
 
 	// copy
-	return c.client.CopyObject(c.ctx, dstOpts, srcOpts)
+	return c.Client().CopyObject(c.ctx, dstOpts, srcOpts)
 }
 func (c *Conn) RemoveObject(bucketName string, objectName string) (err error) {
 	//opts := minio.RemoveObjectOptions{
@@ -213,7 +210,7 @@ func (c *Conn) RemoveObject(bucketName string, objectName string) (err error) {
 	//	VersionID:        "myversionid",
 	//}
 	//opts.GovernanceBypass = true
-	return c.client.RemoveObject(c.ctx, bucketName, objectName, c.removeObjectOptions)
+	return c.Client().RemoveObject(c.ctx, bucketName, objectName, c.removeObjectOptions)
 }
 
 func (c *Conn) PutObjectTagging(bucketName, objectName string, tagMap map[string]string) (err error) {
@@ -221,17 +218,17 @@ func (c *Conn) PutObjectTagging(bucketName, objectName string, tagMap map[string
 	if err != nil {
 		return err
 	}
-	return c.client.PutObjectTagging(c.ctx, bucketName, objectName, tagData, minio.PutObjectTaggingOptions{})
+	return c.Client().PutObjectTagging(c.ctx, bucketName, objectName, tagData, minio.PutObjectTaggingOptions{})
 }
 func (c *Conn) GetObjectTagging(bucketName, objectName string) (map[string]string, error) {
-	tagData, err := c.client.GetObjectTagging(c.ctx, bucketName, objectName, minio.GetObjectTaggingOptions{})
+	tagData, err := c.Client().GetObjectTagging(c.ctx, bucketName, objectName, minio.GetObjectTaggingOptions{})
 	if err != nil {
 		return nil, err
 	}
 	return tagData.ToMap(), nil
 }
 func (c *Conn) RemoveObjectTagging(bucketName, objectName string) error {
-	return c.client.RemoveObjectTagging(c.ctx, bucketName, objectName, minio.RemoveObjectTaggingOptions{})
+	return c.Client().RemoveObjectTagging(c.ctx, bucketName, objectName, minio.RemoveObjectTaggingOptions{})
 }
 
 // PresignedGetObject
@@ -241,17 +238,17 @@ func (c *Conn) RemoveObjectTagging(bucketName, objectName string) error {
 //	 	make(url.Values)
 //		reqParams.Set("response-content-disposition", "attachment; filename=\"your-filename.txt\"")
 func (c *Conn) PresignedGetObject(bucketName, objectName string, expiry time.Duration) (*url.URL, error) {
-	return c.client.PresignedGetObject(c.ctx, bucketName, objectName, expiry, c.reqParams)
+	return c.Client().PresignedGetObject(c.ctx, bucketName, objectName, expiry, c.reqParams)
 }
 
 // PresignedPutObject
 // PUT url
 // Body is file data
 func (c *Conn) PresignedPutObject(bucketName, objectName string, expiry time.Duration) (*url.URL, error) {
-	return c.client.PresignedPutObject(c.ctx, bucketName, objectName, expiry)
+	return c.Client().PresignedPutObject(c.ctx, bucketName, objectName, expiry)
 }
 
-// PresignedPutObject
+// PresignedPostPolicy
 // Post url
 // Body is formdata  file=@/filePath
 func (c *Conn) PresignedPostPolicy(bucketName, objectName string, expiry time.Duration) (*url.URL, map[string]string, error) {
@@ -279,7 +276,7 @@ func (c *Conn) PresignedPostPolicy(bucketName, objectName string, expiry time.Du
 	//policy.SetUserMetadata("custom", "user")
 
 	// Get the POST form key/value object:
-	return c.client.PresignedPostPolicy(c.ctx, policy)
+	return c.Client().PresignedPostPolicy(c.ctx, policy)
 }
 
 /*
