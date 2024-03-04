@@ -8,7 +8,7 @@ import (
 
 func TestMinio(t *testing.T) {
 
-	m := New().SetAddresses("localhost:9000").
+	m := New().SetAddresses("minio.liushuojia.com").
 		SetAccessKey("wtXQGX8jOXQ0r3wMpf4Q").
 		SetSecretKey("LmOTOUDJJuetuKzctlO0x4dRrRVWvz7RGz8A51cV").
 		SetUseSSL(false).Connect()
@@ -16,13 +16,29 @@ func TestMinio(t *testing.T) {
 	bucketName := "test"
 	objectName := "2.jpg"
 
+	u, err := m.PresignedGetObject(bucketName, objectName, time.Hour)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(u.String())
+	return
+
 	// Get the POST form key/value object:
-	url, formData, err := m.PresignedPostPolicy(bucketName, "myobject", time.Hour)
+	url, formData, err := m.PresignedPostPolicy(bucketName, objectName, time.Hour)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+	fmt.Println(url.String())
+	// POST your content from the command line using `curl`
+	for k, v := range formData {
+		fmt.Println(fmt.Sprintf("%s=%s", k, v))
+	}
+	fmt.Println("-F file=@/Volumes/work/app-aliyun/docker/README.md ")
+
+	return
 	fmt.Println(url.String())
 	fmt.Println(formData)
 

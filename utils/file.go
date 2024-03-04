@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -87,4 +88,31 @@ func FileContentType(filePath string) (string, error) {
 	contentType := http.DetectContentType(buffer)
 
 	return contentType, nil
+}
+
+func DeleteFile(path string) error {
+	return os.Remove(path)
+}
+
+func DeleteFolder(path string) error {
+	files, err := os.ReadDir(path) //读取目录下所有文件和子文件夹
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		filePath := fmt.Sprintf("%s/%s", path, file.Name())
+		if file.IsDir() {
+			if err := DeleteFolder(filePath); err != nil {
+				return err
+			}
+		} else {
+			if err := DeleteFile(filePath); err != nil {
+				return err
+			}
+		}
+	}
+
+	// 最后删除空文件夹
+	return os.RemoveAll(path)
 }

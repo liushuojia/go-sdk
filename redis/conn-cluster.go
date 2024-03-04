@@ -73,6 +73,17 @@ func (c *ConnCluster) GetRedis() *redis.ClusterClient {
 	return c.ClusterClient
 }
 
+func (c *ConnCluster) GetByKey(key string) ([]string, error) {
+	return c.ClusterClient.Do(c.ctx, "KEYS", key).StringSlice() // *prefix*为要查找的Key的前缀部分
+}
+func (c *ConnCluster) DeleteByKey(prefix_key string) error {
+	list, err := c.GetByKey(prefix_key)
+	if err != nil {
+		return err
+	}
+	return c.ClusterClient.Del(c.ctx, list...).Err()
+}
+
 func (c *ConnCluster) Reader(cb Callback, topicList ...string) {
 	// There is no error because go-redis automatically reconnects on error.
 	pub := c.Subscribe(c.ctx, topicList...)

@@ -91,6 +91,17 @@ func (c *Conn) GetRedis() *redis.Client {
 	return c.Client
 }
 
+func (c *Conn) GetByKey(key string) ([]string, error) {
+	return c.Client.Do(c.ctx, "KEYS", key).StringSlice() // *prefix*为要查找的Key的前缀部分
+}
+func (c *Conn) DeleteByKey(prefix_key string) error {
+	list, err := c.GetByKey(prefix_key)
+	if err != nil {
+		return err
+	}
+	return c.Client.Del(c.ctx, list...).Err()
+}
+
 func (c *Conn) Reader(cb Callback, topicList ...string) {
 	// There is no error because go-redis automatically reconnects on error.
 	pub := c.Subscribe(c.ctx, topicList...)

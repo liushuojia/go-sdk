@@ -8,7 +8,6 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/tags"
 	"io"
-	"log"
 	"net/url"
 	"os"
 	"time"
@@ -87,9 +86,6 @@ func (c *Conn) SetRequestParams(reqParams url.Values) *Conn {
 }
 
 func (c *Conn) Connect() *Conn {
-	log.Println("[minio]", "connect minio")
-
-	// Initialize minio client object.
 	minioClient, _ := minio.New(c.addresses, &minio.Options{
 		Creds:  credentials.NewStaticV4(c.accessKey, c.secretKey, ""),
 		Secure: c.useSSL,
