@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+/*
+#go https 请求时出现的问题 如果部署在docker上， dockerFile必须添加以下内容
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+*/
+
 func httpDo(method string, url string, msg string) ([]byte, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(

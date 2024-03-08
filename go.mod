@@ -8,6 +8,7 @@ require (
 	github.com/alibabacloud-go/dysmsapi-20170525/v2 v2.0.18
 	github.com/alibabacloud-go/tea v1.2.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/disintegration/imaging v1.6.2
 	github.com/eclipse/paho.mqtt.golang v1.4.3
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/farmerx/gorsa v0.0.0-20161211100049-3ae06f674f40

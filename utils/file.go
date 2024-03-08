@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/disintegration/imaging"
+	"image"
 	"io"
 	"net/http"
 	"os"
@@ -115,4 +117,33 @@ func DeleteFolder(path string) error {
 
 	// 最后删除空文件夹
 	return os.RemoveAll(path)
+}
+
+func CutImage(dstFileName, srcFileName string, width int) (err error) {
+
+	file, err := os.Open(dstFileName)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	c, _, err := image.DecodeConfig(file)
+	if err != nil {
+		return
+	}
+
+	if c.Width <= (width) {
+		_, err = CopyFile(dstFileName, srcFileName)
+		return
+	}
+
+	//按照宽度进行等比例缩放
+	src, err := imaging.Open(dstFileName, imaging.AutoOrientation(true))
+	if err != nil {
+		return
+	}
+
+	src = imaging.Resize(src, width, 0, imaging.Lanczos)
+	err = imaging.Save(src, srcFileName)
+	return
 }

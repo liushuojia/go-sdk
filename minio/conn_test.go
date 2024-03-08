@@ -7,21 +7,38 @@ import (
 )
 
 func TestMinio(t *testing.T) {
+	// app
+	//	minio.liushuojia.com
+	//	4Sg021YTfzKGWigg3KHa
+	//	XGkdQF7nWRhRNTI3f4fRgxSkvvIq1aEtxoLHkv9b
 
-	m := New().SetAddresses("minio.liushuojia.com").
-		SetAccessKey("wtXQGX8jOXQ0r3wMpf4Q").
-		SetSecretKey("LmOTOUDJJuetuKzctlO0x4dRrRVWvz7RGz8A51cV").
-		SetUseSSL(false).Connect()
+	// local
+	// minio.home.liushuojia.com
+	// ng9a9nKDxQImlDUvGtlE
+	// tWZ5hPM9xcuSgNVVS4VwT22zuUKZfEDNxjCIuDRa
 
-	bucketName := "test"
-	objectName := "2.jpg"
+	addresses := "minio.liushuojia.com"
+	accessKey := "4Sg021YTfzKGWigg3KHa"
+	secretKey := "XGkdQF7nWRhRNTI3f4fRgxSkvvIq1aEtxoLHkv9b"
+	m := New().SetAddresses(addresses).
+		SetAccessKey(accessKey).
+		SetSecretKey(secretKey).
+		SetUseSSL(false).
+		Connect()
 
-	u, err := m.PresignedGetObject(bucketName, objectName, time.Hour)
+	//bucketName := "test"
+	bucketName := "yunjitrip"
+	objectName := "logo.jpg"
+
+	fmt.Println(m.StatObject(bucketName, objectName))
+
+	u, err := m.PresignedGetObject(bucketName, objectName, 2*time.Hour)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(u.String())
+	fmt.Println(u)
+
 	return
 
 	// Get the POST form key/value object:
