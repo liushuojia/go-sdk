@@ -17,9 +17,9 @@ func TestMinio(t *testing.T) {
 	// ng9a9nKDxQImlDUvGtlE
 	// tWZ5hPM9xcuSgNVVS4VwT22zuUKZfEDNxjCIuDRa
 
-	addresses := "minio.liushuojia.com"
-	accessKey := "4Sg021YTfzKGWigg3KHa"
-	secretKey := "XGkdQF7nWRhRNTI3f4fRgxSkvvIq1aEtxoLHkv9b"
+	addresses := "minio.home.liushuojia.com"
+	accessKey := "ng9a9nKDxQImlDUvGtlE"
+	secretKey := "tWZ5hPM9xcuSgNVVS4VwT22zuUKZfEDNxjCIuDRa"
 	m := New().SetAddresses(addresses).
 		SetAccessKey(accessKey).
 		SetSecretKey(secretKey).
@@ -27,8 +27,8 @@ func TestMinio(t *testing.T) {
 		Connect()
 
 	//bucketName := "test"
-	bucketName := "yunjitrip"
-	objectName := "logo.jpg"
+	bucketName := "user-base"
+	objectName := "2021/01/28/390742-3.jpg"
 
 	fmt.Println(m.StatObject(bucketName, objectName))
 

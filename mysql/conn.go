@@ -9,11 +9,6 @@ import (
 	"time"
 )
 
-const (
-	max_id   = 10
-	max_open = 100
-)
-
 func GormDB(username, password, host string, port int, database string) (*gorm.DB, error) {
 	conn, err := gorm.Open(
 		mysql.Open(

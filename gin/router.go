@@ -13,7 +13,7 @@ func Router(debug bool) *gin.Engine {
 	router := gin.Default()
 
 	// 全局中间件
-	//router.Use(gin.Recovery())
+	// router.Use(gin.Recovery())
 
 	// 日志中间件
 	//router.Use(gin.Logger())

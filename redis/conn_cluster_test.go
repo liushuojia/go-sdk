@@ -2,6 +2,7 @@ package redisConn
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"testing"
 	"time"
@@ -9,7 +10,9 @@ import (
 
 // 目录下 go test
 func TestRedisCluster(t *testing.T) {
-	t.Log("redis cluster test")
+	log.Println("TestRedisCluster")
+
+	log.Println("redis cluster test")
 
 	r := NewCluster().SetAddr(":7001").Connect()
 

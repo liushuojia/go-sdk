@@ -119,9 +119,9 @@ func DeleteFolder(path string) error {
 	return os.RemoveAll(path)
 }
 
-func CutImage(dstFileName, srcFileName string, width int) (err error) {
+func CutImage(oldFileName, newFileName string, width int) (err error) {
 
-	file, err := os.Open(dstFileName)
+	file, err := os.Open(oldFileName)
 	if err != nil {
 		return
 	}
@@ -133,17 +133,17 @@ func CutImage(dstFileName, srcFileName string, width int) (err error) {
 	}
 
 	if c.Width <= (width) {
-		_, err = CopyFile(dstFileName, srcFileName)
+		_, err = CopyFile(newFileName, oldFileName)
 		return
 	}
 
 	//按照宽度进行等比例缩放
-	src, err := imaging.Open(dstFileName, imaging.AutoOrientation(true))
+	src, err := imaging.Open(oldFileName, imaging.AutoOrientation(true))
 	if err != nil {
 		return
 	}
 
 	src = imaging.Resize(src, width, 0, imaging.Lanczos)
-	err = imaging.Save(src, srcFileName)
+	err = imaging.Save(src, newFileName)
 	return
 }
