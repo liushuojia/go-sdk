@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )

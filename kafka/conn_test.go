@@ -2,7 +2,7 @@ package kafkaConn
 
 import (
 	"github.com/segmentio/kafka-go"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 	"testing"
 	"time"

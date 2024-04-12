@@ -2,7 +2,7 @@ package mqttConn
 
 import (
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"testing"
 	"time"
 )

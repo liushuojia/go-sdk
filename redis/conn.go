@@ -3,8 +3,8 @@ package redisConn
 import (
 	"context"
 	"github.com/redis/go-redis/v9"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
-	"log"
 	"net"
 	"time"
 )
@@ -43,14 +43,16 @@ func (c *Conn) ConnectWithSSH(client *ssh.Client) *Conn {
 		Dialer: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			return client.DialContext(ctx, network, addr)
 		},
-		ReadTimeout:  -2,
-		WriteTimeout: -2,
+		ReadTimeout:  -1,
+		WriteTimeout: -1,
 	}
 
 	c.Client = redis.NewClient(ops)
 	return c
 }
 func (c *Conn) Connect() *Conn {
+	log.Println("[redis]", "connect redis", "host", c.addr, "db", c.db)
+
 	ops := &redis.Options{
 		Addr:     c.addr,
 		Password: c.password,
@@ -123,13 +125,13 @@ func (c *Conn) Reader(cb Callback, topicList ...string) {
 	// There is no error because go-redis automatically reconnects on error.
 	pub := c.Subscribe(c.ctx, topicList...)
 	defer pub.Close()
-	log.Println("[subscribe]", "topic:", topicList, "start")
+	log.Println("[subscribe]", "redis", "channel:", topicList, "start")
 
 	for {
 		select {
 		case message := <-pub.Channel():
 			if message != nil {
-				log.Println("[subscribe]", "channel:", message.Channel, "payload", message.Payload)
+				log.Println("[subscribe]", "redis", "channel:", message.Channel, "payload", message.Payload)
 				//cb(message)
 				cb(message.Channel, message.Payload)
 			}
@@ -138,7 +140,7 @@ func (c *Conn) Reader(cb Callback, topicList ...string) {
 		}
 	}
 END:
-	log.Println("[subscribe]", "topic:", topicList, "end")
+	log.Println("[subscribe]", "redis", "channel:", topicList, "end")
 }
 
 // r.Publish(r.ctx, "topic", "topic a "+strconv.Itoa(i))

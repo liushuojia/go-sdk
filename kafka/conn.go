@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/segmentio/kafka-go"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 

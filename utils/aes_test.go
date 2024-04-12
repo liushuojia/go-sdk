@@ -3,7 +3,7 @@ package utils
 import (
 	"encoding/base64"
 	"encoding/hex"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"testing"
 )
 

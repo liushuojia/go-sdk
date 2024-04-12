@@ -69,6 +69,8 @@ func (m *MySQL) ConnWithSSH(client *ssh.Client) (*gorm.DB, error) {
 	return conn, nil
 }
 func (m *MySQL) Conn() (*gorm.DB, error) {
+	log.Println("[mysql]", "connect mysql", "host", fmt.Sprintf("%s:%d", m.Host, m.Port), "database", m.Database)
+
 	// 填写注册的mysql网络
 	conn, err := gorm.Open(
 		sql.Open(

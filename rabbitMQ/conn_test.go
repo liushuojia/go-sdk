@@ -3,6 +3,7 @@ package rabbitMQConn
 import (
 	"fmt"
 	"github.com/streadway/amqp"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -10,7 +11,7 @@ import (
 // 目录下 go test
 func TestRabbitMQConn(t *testing.T) {
 
-	c := New().SetUrl("admin", "admin", "localhost", 5672, "/")
+	c := New().SetUrl("admin", "liushuojia", "106.55.61.225", 33003, "/")
 	if err := c.Connect(); err != nil {
 		panic(err)
 	}
@@ -63,15 +64,15 @@ func TestRabbitMQConn(t *testing.T) {
 		"my-queue",
 	)
 
-	//go func() {
-	//	for i := 0; i < 30; i++ {
-	//		s := []byte("hi " + strconv.Itoa(i))
-	//		fmt.Println("============================================")
-	//		fmt.Println(string(s))
-	//		fmt.Println(c.PublishQueue("my-queue", s))
-	//		time.Sleep(time.Second)
-	//	}
-	//}()
+	go func() {
+		for i := 0; i < 30; i++ {
+			s := []byte("hi " + strconv.Itoa(i))
+			fmt.Println("============================================")
+			fmt.Println(string(s))
+			fmt.Println(c.PublishQueue("my-queue", s))
+			time.Sleep(time.Second)
+		}
+	}()
 
 	time.Sleep(time.Minute * 3)
 }

@@ -8,7 +8,7 @@ import (
 	mysqlConn "github.com/liushuojia/go-sdk/mysql"
 	tokenConn "github.com/liushuojia/go-sdk/token"
 	websocketConn "github.com/liushuojia/go-sdk/websocket"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"time"

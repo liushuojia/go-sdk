@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
 )

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"log"
 	"sync"
 	"time"
 )
@@ -24,8 +24,8 @@ func New() *Conn {
 type Callback func(exchange, routingKey string, body []byte) error
 
 type Conn struct {
-	connection    *amqp.Connection
-	channel       *amqp.Channel
+	connection *amqp.Connection
+	//channel       *amqp.Channel
 	url           string
 	ctx           context.Context
 	cancel        context.CancelFunc
@@ -65,9 +65,6 @@ func (r *Conn) SetUrl(user, password, host string, port int, vhost string) *Conn
 }
 
 func (r *Conn) closeConnect() {
-	if r.channel != nil {
-		r.channel.Close()
-	}
 	if r.connection != nil && !r.connection.IsClosed() {
 		r.connection.Close()
 	}
@@ -83,10 +80,6 @@ func (r *Conn) init() *Conn {
 func (r *Conn) connect() error {
 	var err error
 	r.connection, err = amqp.Dial(r.url)
-	if err != nil {
-		return err
-	}
-	r.channel, err = r.connection.Channel()
 	if err != nil {
 		return err
 	}
@@ -158,7 +151,13 @@ END:
 */
 
 func (r *Conn) CreateExchangeAction(name, kind string, durable, autoDelete, internal, noWait bool, args amqp.Table) error {
-	return r.channel.ExchangeDeclare(
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return err
+	}
+	defer channel.Close()
+
+	return channel.ExchangeDeclare(
 		name,       // name
 		kind,       // type
 		durable,    // durable
@@ -168,9 +167,14 @@ func (r *Conn) CreateExchangeAction(name, kind string, durable, autoDelete, inte
 		args,       // arguments
 	)
 }
-func (r *Conn) CreateQueueAction(name string, durable, autoDelete, exclusive, noWait bool, args amqp.Table) (amqp.Queue, error) {
-	// 队列不存在创建
-	return r.channel.QueueDeclare(
+func (r *Conn) CreateQueueAction(name string, durable, autoDelete, exclusive, noWait bool, args amqp.Table) (queue amqp.Queue, err error) {
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return queue, err
+	}
+	defer channel.Close()
+
+	return channel.QueueDeclare(
 		name,       // name 队列名称 为空时，名称随机
 		durable,    // durable 是否持久化
 		autoDelete, // delete when unused 是否自动删除
@@ -192,8 +196,14 @@ func (r *Conn) CreateExchange(name, kind string) error {
 	)
 }
 func (r *Conn) CreateExchangeBind(name string, exchange string, routingKeys ...string) error {
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return err
+	}
+	defer channel.Close()
+
 	for _, k := range routingKeys {
-		err := r.channel.ExchangeBind(
+		err := channel.ExchangeBind(
 			name,     // name
 			k,        // routing key
 			exchange, // exchange
@@ -225,8 +235,14 @@ func (r *Conn) CreateQueue(nameList ...string) error {
 	return nil
 }
 func (r *Conn) CreateQueueBind(name string, exchange string, routingKeys ...string) error {
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return err
+	}
+	defer channel.Close()
+
 	for _, k := range routingKeys {
-		err := r.channel.QueueBind(
+		err := channel.QueueBind(
 			name,     // queue name
 			k,        // routing key
 			exchange, // exchange
@@ -248,10 +264,18 @@ func (r *Conn) PublishExchange(name, kind, key string, body []byte) error {
 	if err := r.wait(); err != nil {
 		return err
 	}
+
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return err
+	}
+	defer channel.Close()
+
 	if err := r.CreateExchange(name, kind); err != nil {
 		return err
 	}
-	return r.channel.Publish(
+
+	return channel.Publish(
 		name,  // exchange
 		key,   // routing key
 		false, // mandatory
@@ -266,10 +290,18 @@ func (r *Conn) PublishQueue(name string, body []byte) error {
 	if err := r.wait(); err != nil {
 		return err
 	}
+
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return err
+	}
+	defer channel.Close()
+
 	if err := r.CreateQueue(name); err != nil {
 		return err
 	}
-	return r.channel.Publish(
+
+	return channel.Publish(
 		"",    // exchange
 		name,  // name
 		false, // mandatory
@@ -293,21 +325,33 @@ START:
 		return
 	}
 
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return
+	}
+	defer channel.Close()
+
 	log.Println("[subscribe]", "rabbitMQ", kind, name, routingKeys, "start")
 	if err := r.CreateExchange(name, kind); err != nil {
+		log.Println("CreateQueueBind", kind, name, routingKeys, err)
+		time.Sleep(reconnectDelay)
 		goto START
 	}
 	q, err := r.CreateQueueAction("", false, true, false, false, nil)
 	if err != nil {
+		log.Println("CreateQueueAction", kind, name, routingKeys, err)
+		time.Sleep(reconnectDelay)
 		goto START
 	}
 	if routingKeys == nil || len(routingKeys) <= 0 {
 		routingKeys = []string{""}
 	}
 	if err := r.CreateQueueBind(q.Name, name, routingKeys...); err != nil {
+		log.Println("CreateQueueBind", kind, name, routingKeys, err)
+		time.Sleep(reconnectDelay)
 		goto START
 	}
-	message, err := r.channel.Consume(
+	message, err := channel.Consume(
 		q.Name, // name
 		"",
 		false,
@@ -317,6 +361,8 @@ START:
 		nil,
 	)
 	if err != nil {
+		log.Println("Consume", err)
+		time.Sleep(reconnectDelay)
 		goto START
 	}
 	for {
@@ -331,6 +377,8 @@ START:
 		case <-r.ctx.Done():
 			goto END
 		case <-r.notifyClose:
+			log.Println("notifyClose")
+			time.Sleep(reconnectDelay)
 			goto START
 		}
 	}
@@ -343,11 +391,20 @@ START:
 		return
 	}
 
+	channel, err := r.connection.Channel()
+	if err != nil {
+		return
+	}
+	defer channel.Close()
+
 	log.Println("[subscribe]", "rabbitMQ", "queue", name, "start")
 	if err := r.CreateQueue(name); err != nil {
+		log.Println("CreateQueue", err)
+		time.Sleep(reconnectDelay)
 		goto START
 	}
-	message, err := r.channel.Consume(
+
+	message, err := channel.Consume(
 		name, // name
 		"",
 		false,
@@ -357,6 +414,8 @@ START:
 		nil,
 	)
 	if err != nil {
+		log.Println("Consume", "queue", name, err)
+		time.Sleep(reconnectDelay)
 		goto START
 	}
 
@@ -372,6 +431,8 @@ START:
 		case <-r.ctx.Done():
 			goto END
 		case <-r.notifyClose:
+			log.Println("notifyClose", "queue", name)
+			time.Sleep(reconnectDelay)
 			goto START
 		}
 	}

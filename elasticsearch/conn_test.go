@@ -2,7 +2,7 @@ package elasticsearchConn
 
 import (
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"testing"
 )

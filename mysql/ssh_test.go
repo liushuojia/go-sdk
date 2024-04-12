@@ -3,7 +3,7 @@ package mysqlConn
 import (
 	"fmt"
 	"github.com/liushuojia/go-sdk/ssh"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"testing"
 )
 
