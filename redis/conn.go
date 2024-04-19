@@ -2,10 +2,12 @@ package redisConn
 
 import (
 	"context"
+	"fmt"
 	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 	"net"
+	"strconv"
 	"time"
 )
 
@@ -143,4 +145,94 @@ END:
 	log.Println("[subscribe]", "redis", "channel:", topicList, "end")
 }
 
-// r.Publish(r.ctx, "topic", "topic a "+strconv.Itoa(i))
+/*
+sequenceNumString,
+workerIDString[len(workerIDString)-2:],
+userIDString[len(userIDString)-2:],
+dataIDString[len(dataIDString)-2:],
+
+	自增数		workerIDBits	userIDBits		dataIDBits
+	sequence	10				7				7
+*/
+const (
+	workerIDBits = uint(10) // 机器id所占的位数
+	userIDBits   = uint(7)  // 机器id所占的位数
+	dataIDBits   = uint(7)  // 机器id所占的位数
+
+	workerIDMax = int64(-1 ^ (-1 << workerIDBits)) // 支持的最大机器id数量
+	userIDMax   = int64(-1 ^ (-1 << userIDBits))   // 支持的最大机器id数量
+	dataIDMax   = int64(-1 ^ (-1 << dataIDBits))   // 支持的最大机器id数量
+
+	//左移位数
+	userIDShift   = dataIDBits
+	workerIDShift = dataIDBits + userIDBits
+	sequenceShift = dataIDBits + userIDBits + workerIDBits
+)
+
+func (c *Conn) ID(code string, dateTime time.Time, workerID, userID int64, dataID int64) (int64, error) {
+
+	//2024
+	//1231
+	fmt.Println(int64(-1 ^ (-1 << 12)))
+	fmt.Println(strconv.FormatInt(2024, 2), len(strconv.FormatInt(2024, 2)))
+	fmt.Println(strconv.FormatInt(1231, 2), len(strconv.FormatInt(1231, 2)))
+	panic("")
+
+	key := fmt.Sprintf("%s:%s", code, dateTime.Format("20060102"))
+	n, err := c.Exists(c.ctx, key).Result()
+	if err != nil {
+		return 0, err
+	}
+	sequenceNum, err := c.Incr(c.ctx, key).Result()
+	if err != nil {
+		return 0, err
+	}
+	if n <= 0 {
+		//首次添加设置超时时间
+		c.Expire(c.ctx, key, time.Hour*24)
+	}
+
+	//fmt.Println("============================================================")
+	//fmt.Println("workerIDMax", workerIDMax)
+	//fmt.Println("userIDMax", userIDMax)
+	//fmt.Println("dataIDMax", dataIDMax)
+
+	userID = userID & userIDMax
+	dataID = dataID & dataIDMax
+	workerID = workerID & workerIDMax
+
+	r := sequenceNum<<sequenceShift | workerID<<workerIDShift | userID<<userIDShift | dataID
+
+	fmt.Println("============================================================")
+	fmt.Println("userID", userID)
+	fmt.Println("dataID", dataID)
+	fmt.Println("workerID", workerID)
+	fmt.Println("sequenceNum", sequenceNum)
+	fmt.Println("result", r, len(fmt.Sprintf("%d", r)))
+
+	return r, nil
+
+	userIDString := fmt.Sprintf("000000000000%d", userID)
+	dataIDString := fmt.Sprintf("000000000000%d", dataID)
+	workerIDString := fmt.Sprintf("000000000000%d", workerID)
+	sequenceNumString := fmt.Sprintf("%d", sequenceNum)
+	if len(sequenceNumString) < 6 {
+		sequenceNumString = "000000000000000000000000" + sequenceNumString
+		sequenceNumString = sequenceNumString[len(sequenceNumString)-6:]
+	}
+	numString := fmt.Sprintf("%s%s%s%s%s",
+		time.Now().Format("2006"),
+		sequenceNumString,
+		workerIDString[len(workerIDString)-2:],
+		userIDString[len(userIDString)-2:],
+		dataIDString[len(dataIDString)-2:],
+	)
+
+	fmt.Println(numString, len(numString))
+	num, err := strconv.Atoi(numString)
+	if err != nil {
+		return 0, err
+	}
+
+	return int64(num), nil
+}

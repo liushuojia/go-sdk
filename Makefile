@@ -5,7 +5,7 @@ mod:
 	go mod tidy
 	go mod download
 	go mod vendor
-	go mod verify
+	go mod verifymak
 
 git:
 	git add .

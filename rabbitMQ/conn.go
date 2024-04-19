@@ -271,9 +271,9 @@ func (r *Conn) PublishExchange(name, kind, key string, body []byte) error {
 	}
 	defer channel.Close()
 
-	if err := r.CreateExchange(name, kind); err != nil {
-		return err
-	}
+	//if err := r.CreateExchange(name, kind); err != nil {
+	//	return err
+	//}
 
 	return channel.Publish(
 		name,  // exchange
@@ -297,9 +297,9 @@ func (r *Conn) PublishQueue(name string, body []byte) error {
 	}
 	defer channel.Close()
 
-	if err := r.CreateQueue(name); err != nil {
-		return err
-	}
+	//if err := r.CreateQueue(name); err != nil {
+	//	return err
+	//}
 
 	return channel.Publish(
 		"",    // exchange
@@ -320,6 +320,7 @@ func (r *Conn) PublishQueue(name string, body []byte) error {
 */
 
 func (r *Conn) SubscribeExchange(callback Callback, name, kind string, routingKeys ...string) {
+
 START:
 	if err := r.wait(); err != nil {
 		return
@@ -327,9 +328,11 @@ START:
 
 	channel, err := r.connection.Channel()
 	if err != nil {
-		return
+		log.Println("channel", kind, name, routingKeys, err)
+		time.Sleep(reconnectDelay)
+		goto START
 	}
-	defer channel.Close()
+	//defer channel.Close()
 
 	log.Println("[subscribe]", "rabbitMQ", kind, name, routingKeys, "start")
 	if err := r.CreateExchange(name, kind); err != nil {
@@ -383,6 +386,7 @@ START:
 		}
 	}
 END:
+	channel.Close()
 	log.Println("[subscribe]", "rabbitMQ", kind, name, routingKeys, "end")
 }
 func (r *Conn) SubscribeQueue(callback Callback, name string) {
@@ -393,13 +397,15 @@ START:
 
 	channel, err := r.connection.Channel()
 	if err != nil {
-		return
+		log.Println("channel", "queue", name, err)
+		time.Sleep(reconnectDelay)
+		goto START
 	}
-	defer channel.Close()
+	//defer channel.Close()
 
 	log.Println("[subscribe]", "rabbitMQ", "queue", name, "start")
 	if err := r.CreateQueue(name); err != nil {
-		log.Println("CreateQueue", err)
+		log.Println("CreateQueue", "queue", name, err)
 		time.Sleep(reconnectDelay)
 		goto START
 	}
@@ -437,5 +443,6 @@ START:
 		}
 	}
 END:
+	channel.Close()
 	log.Println("[subscribe]", "rabbitMQ", "queue", name, "end")
 }

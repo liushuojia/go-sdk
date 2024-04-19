@@ -108,3 +108,24 @@ func TestConnectRedis(t *testing.T) {
 	//fmt.Println("end")
 	time.Sleep(60 * time.Second)
 }
+
+// 目录下 go test -run TestRedisID
+func TestRedisID(t *testing.T) {
+	log.Println("redis test")
+
+	r := New().SetAddr("127.0.0.1:6379").SetPassword("liushuojia").SetDB(0).Connect()
+
+	m := make(map[int64]bool)
+	for j := 0; j < 2; j++ {
+		for i := 0; i < 10; i++ {
+			n, _ := r.ID("order", time.Now().AddDate(0, 0, j), 1, int64(12399+i), int64(221+i))
+			if _, ok := m[n]; ok {
+				fmt.Println("存在相同的id")
+				panic("")
+			}
+			m[n] = true
+		}
+	}
+	return
+
+}

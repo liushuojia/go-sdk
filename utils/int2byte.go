@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/binary"
+	"strconv"
 )
 
 // IntToBytes 整形转换成字节
@@ -16,8 +17,15 @@ func IntToBytes(n int64) []byte {
 
 // BytesToInt 字节转换成整形
 func BytesToInt(b []byte) int64 {
-	bytesBuffer := bytes.NewBuffer(b)
 	var x int32
-	binary.Read(bytesBuffer, binary.BigEndian, &x)
-	return int64(x)
+	bytesBuffer := bytes.NewBuffer(b)
+	if err := binary.Read(bytesBuffer, binary.BigEndian, &x); err == nil {
+		return int64(x)
+	}
+
+	i, err := strconv.Atoi(string(b))
+	if err != nil {
+		return 0
+	}
+	return int64(i)
 }
