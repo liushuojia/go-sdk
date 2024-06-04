@@ -20,7 +20,7 @@ func New() *Conn {
 	return (&Conn{}).SetContext(context.Background())
 }
 
-// type Callback func(message amqp.Delivery) error
+// Callback func(message amqp.Delivery) error
 type Callback func(exchange, routingKey string, body []byte) error
 
 type Conn struct {
@@ -320,7 +320,6 @@ func (r *Conn) PublishQueue(name string, body []byte) error {
 */
 
 func (r *Conn) SubscribeExchange(callback Callback, name, kind string, routingKeys ...string) {
-
 START:
 	if err := r.wait(); err != nil {
 		return
@@ -332,7 +331,9 @@ START:
 		time.Sleep(reconnectDelay)
 		goto START
 	}
-	//defer channel.Close()
+
+	notifyClose := make(chan *amqp.Error)
+	channel.NotifyClose(notifyClose)
 
 	log.Println("[subscribe]", "rabbitMQ", kind, name, routingKeys, "start")
 	if err := r.CreateExchange(name, kind); err != nil {
@@ -354,15 +355,7 @@ START:
 		time.Sleep(reconnectDelay)
 		goto START
 	}
-	message, err := channel.Consume(
-		q.Name, // name
-		"",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
+	message, err := channel.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
 		log.Println("Consume", err)
 		time.Sleep(reconnectDelay)
@@ -377,6 +370,9 @@ START:
 			if err := callback(d.Exchange, d.RoutingKey, d.Body); err == nil {
 				d.Ack(true)
 			}
+		case <-notifyClose:
+			log.Println("[subscribe]", "rabbitMQ", kind, name, routingKeys, "restart")
+			goto START
 		case <-r.ctx.Done():
 			goto END
 		case <-r.notifyClose:
@@ -401,7 +397,9 @@ START:
 		time.Sleep(reconnectDelay)
 		goto START
 	}
-	//defer channel.Close()
+
+	notifyClose := make(chan *amqp.Error)
+	channel.NotifyClose(notifyClose)
 
 	log.Println("[subscribe]", "rabbitMQ", "queue", name, "start")
 	if err := r.CreateQueue(name); err != nil {
@@ -410,15 +408,7 @@ START:
 		goto START
 	}
 
-	message, err := channel.Consume(
-		name, // name
-		"",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
+	message, err := channel.Consume(name, "", false, false, false, false, nil)
 	if err != nil {
 		log.Println("Consume", "queue", name, err)
 		time.Sleep(reconnectDelay)
@@ -434,6 +424,9 @@ START:
 			if err := callback(d.Exchange, d.RoutingKey, d.Body); err == nil {
 				d.Ack(true)
 			}
+		case <-notifyClose:
+			log.Println("[subscribe]", "rabbitMQ", "queue", name, "restart")
+			goto START
 		case <-r.ctx.Done():
 			goto END
 		case <-r.notifyClose:

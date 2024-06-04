@@ -2,10 +2,25 @@ package mysqlConn
 
 import (
 	"fmt"
+	"github.com/blastrain/vitess-sqlparser/tidbparser/ast"
+	"github.com/blastrain/vitess-sqlparser/tidbparser/dependency/mysql"
+	"github.com/blastrain/vitess-sqlparser/tidbparser/dependency/types"
+	"github.com/blastrain/vitess-sqlparser/tidbparser/parser"
 	"gorm.io/gorm"
 	"strconv"
 	"strings"
 )
+
+type StructInfo struct {
+	Name   string
+	Fields []StructInfoField
+}
+
+type StructInfoField struct {
+	FieldName    string
+	FieldType    string
+	FieldComment string
+}
 
 func NewDatabase() *Database {
 	return &Database{}
@@ -18,6 +33,8 @@ type Database struct {
 	port     int
 	database string
 
+	dns string
+
 	db *gorm.DB
 
 	TableList []string
@@ -27,6 +44,7 @@ type DatabaseTable struct {
 	createSqlString string
 	FieldList       []string
 	FieldMap        map[string]*DatabaseTableField
+	FieldMapFromSql map[string]*DatabaseTableField
 }
 type DatabaseTableField struct {
 	Column        string `json:"column"`
@@ -61,14 +79,30 @@ func (d *Database) SetDatabase(database string) *Database {
 	d.database = database
 	return d
 }
+func (d *Database) SetDns(dns string) *Database {
+	d.dns = dns
+	return d
+}
+func (d *Database) SetDB(db *gorm.DB) *Database {
+	d.db = db
+	return d
+}
 
 func (d *Database) DB() (*gorm.DB, error) {
 	if d.db == nil {
-		gormDB, err := GormDB(d.username, d.password, d.host, d.port, d.database)
-		if err != nil {
-			return nil, err
+		if d.dns != "" {
+			gormDB, err := GormDnsDB(d.dns)
+			if err != nil {
+				return nil, err
+			}
+			d.db = gormDB
+		} else {
+			gormDB, err := GormDB(d.username, d.password, d.host, d.port, d.database)
+			if err != nil {
+				return nil, err
+			}
+			d.db = gormDB
 		}
-		d.db = gormDB
 	}
 	return d.db.Session(&gorm.Session{NewDB: true}), nil
 }
@@ -131,7 +165,7 @@ func (d *Database) GetTable(tableName string) (*DatabaseTable, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows, err := gormDB.Raw("SHOW CREATE table " + tableName).Rows()
+	rows, err := gormDB.Raw(fmt.Sprintf("SHOW CREATE table `%s`", tableName)).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -172,6 +206,8 @@ func (d *Database) GetTable(tableName string) (*DatabaseTable, error) {
 		return nil, err
 	}
 
+	_, databaseTable.FieldMapFromSql, err = d.GetTableFieldFrom(databaseTable.createSqlString)
+
 	return databaseTable, nil
 }
 func (d *Database) GetTableField(tableName string) ([]string, map[string]*DatabaseTableField, error) {
@@ -183,7 +219,7 @@ func (d *Database) GetTableField(tableName string) ([]string, map[string]*Databa
 	var fieldList []string
 	fieldMap := make(map[string]*DatabaseTableField)
 
-	rows, err := gormDB.Raw(fmt.Sprintf("desc %s", tableName)).Rows()
+	rows, err := gormDB.Raw(fmt.Sprintf("desc `%s`", tableName)).Rows()
 	cols, _ := rows.Columns()
 	for rows.Next() {
 		columns := make([]interface{}, len(cols))
@@ -249,6 +285,69 @@ func (d *Database) GetTableField(tableName string) ([]string, map[string]*Databa
 	}
 
 	return fieldList, fieldMap, nil
+}
+func (d *Database) GetTableFieldFrom(sqlString string) ([]string, map[string]*DatabaseTableField, error) {
+	var fieldList []string
+	fieldMap := make(map[string]*DatabaseTableField)
+
+	stmts, err := parser.New().Parse(sqlString, "", "")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	for _, stmt := range stmts {
+		stmtTmp, ok := stmt.(*ast.CreateTableStmt)
+		if !ok {
+			fmt.Println(fmt.Errorf("make create table stmt failed"))
+			continue
+		}
+
+		for _, fieldItem := range stmtTmp.Cols {
+			columnName := fieldItem.Name.String()
+			fieldList = append(fieldList, columnName)
+			databaseTableField := &DatabaseTableField{
+				Column:  columnName,
+				Type:    mysqlToProtoBufType(fieldItem.Tp),
+				Comment: "",
+			}
+			for _, filedOption := range fieldItem.Options {
+				if filedOption.Tp == ast.ColumnOptionComment {
+					databaseTableField.Comment = filedOption.Expr.GetDatum().GetString()
+				}
+			}
+
+			fieldMap[columnName] = databaseTableField
+		}
+	}
+
+	return fieldList, fieldMap, nil
+}
+
+// ResetTableName a-bb_cc -> ABbCc
+func (d *Database) ResetTableName(name string) string {
+	if len(name) <= 2 {
+		return strings.ToUpper(name)
+	}
+	tmp := strings.Split(strings.Replace(name, "-", "_", -1), "_")
+	for k, v := range tmp {
+		tmp[k] = strings.ToUpper(v[:1]) + v[1:]
+	}
+	return strings.Join(tmp, "")
+}
+
+// ResetFieldName a-bb_cc -> aBbCc
+func (d *Database) ResetFieldName(name string) string {
+	if len(name) <= 2 {
+		return strings.ToUpper(name)
+	}
+	tmp := strings.Split(strings.Replace(name, "-", "_", -1), "_")
+	for k, v := range tmp {
+		if k == 0 {
+			continue
+		}
+		tmp[k] = strings.ToUpper(v[:1]) + v[1:]
+	}
+	return strings.Join(tmp, "")
 }
 
 func GetUpdateSql(newDB, oldDB *Database) []string {
@@ -370,4 +469,28 @@ func GetUpdateSql(newDB, oldDB *Database) []string {
 		//panic("")
 	}
 	return sqlStringList
+}
+
+func mysqlToProtoBufType(colTp *types.FieldType) (name string) {
+	switch colTp.Tp {
+	//case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong:
+	//	if mysql.HasUnsignedFlag(colTp.Flag) {
+	//		name = "uint"
+	//	} else {
+	//		name = "int"
+	//	}
+	case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong, mysql.TypeLonglong:
+		name = "int64"
+	case mysql.TypeFloat, mysql.TypeDouble, mysql.TypeDecimal, mysql.TypeNewDecimal:
+		name = "double"
+	case mysql.TypeString, mysql.TypeVarchar, mysql.TypeVarString,
+		mysql.TypeBlob, mysql.TypeTinyBlob, mysql.TypeMediumBlob, mysql.TypeLongBlob,
+		mysql.TypeTimestamp, mysql.TypeDatetime, mysql.TypeDate:
+		name = "string"
+	case mysql.TypeJSON:
+		name = "string"
+	default:
+		return "UnSupport"
+	}
+	return
 }
