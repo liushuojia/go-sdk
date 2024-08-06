@@ -1,0 +1,35 @@
+# 一个包含各种数据类型的 TOML 示例
+[app]
+info.name = "my app"
+info.version = "1.0.0"
+debug = true
+
+[app.redis.local]
+host = "127.0.0.1"
+port = 6379
+password = "liushuojia"
+database = 15
+
+[app.redis.dev]
+host = "192.168.124.125"
+port = 6379
+password = "liushuojia"
+database = 15
+
+[app.mysql.dev]
+host = "192.168.124.125"
+port = 3306
+user = "root"
+password = "liushuojia"
+database = "yunji_user"
+
+[app.rabbitMQ.dev]
+host = "192.168.124.125"
+port = 5672
+user = "admin"
+password = "liushuojia"
+vhost = "/"
+topic.a = "topic-a"
+topic.b = "topic-b"
+queue.a = "queue-a"
+queue.b = "queue-b"

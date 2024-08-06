@@ -24,7 +24,7 @@ import "github.com/BurntSushi/toml"
 // 	Database string `toml:"database"`
 // }
 
-func Read(filePath string, config interface{}) error {
+func ReadToml(filePath string, config interface{}) error {
 	// 配置文件路径路径、解析的结构体
 	if _, err := toml.DecodeFile(filePath, config); err != nil {
 		return err
