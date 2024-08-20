@@ -66,6 +66,19 @@ func pkcs5UnPadding(origData []byte) []byte {
 	unpadding := int(origData[length-1])
 	return origData[:(length - unpadding)]
 }
+func RandCBCIV(blockSize int) []byte {
+	// AES块大小为16字节（128位）
+	//blockSize := 16
+	// 初始化向量（IV）应当是唯一的，随机生成
+	iv := make([]byte, blockSize)
+	_, _ = io.ReadFull(rand.Reader, iv) // 使用加密的随机源生成随机IV
+	return iv
+}
+
+/*
+   // 输出随机生成的IV的十六进制字符串形式
+   println("Generated IV:", hex.EncodeToString(iv))
+*/
 
 // =================== ECB ======================
 

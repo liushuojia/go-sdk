@@ -9,16 +9,18 @@ import (
 
 // 目录下 go test
 func TestAES(t *testing.T) {
+	iv := RandCBCIV(16) //16位
+
 	t.Log("aes test")
 	origData := []byte("Hello World") // 待加密的数据
 	key := []byte("ABCDEFGHIJKLMNOP") // 加密的密钥
 	log.Println("原文：", string(origData))
 
 	log.Println("------------------ CBC模式 --------------------")
-	encrypted := AesEncryptCBC(origData, key)
+	encrypted := AesEncryptCBC(origData, key, iv)
 	log.Println("密文(hex)：", hex.EncodeToString(encrypted))
 	log.Println("密文(base64)：", base64.StdEncoding.EncodeToString(encrypted))
-	decrypted := AesDecryptCBC(encrypted, key)
+	decrypted := AesDecryptCBC(encrypted, key, iv)
 	log.Println("解密结果：", string(decrypted))
 
 	log.Println("------------------ ECB模式 --------------------")
