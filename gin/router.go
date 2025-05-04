@@ -3,6 +3,7 @@ package GIN
 import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"net/http"
 	"time"
 )
@@ -26,15 +27,18 @@ func Router(debug bool) *gin.Engine {
 	// 404
 	router.NoRoute(func(c *gin.Context) {
 		//返回404状态码
+		b, _ := io.ReadAll(c.Request.Body)
 		c.JSON(http.StatusNotFound, gin.H{
 			"code":    -1,
 			"message": "404, page not exists!",
-			"data": map[string]string{
+			"data": map[string]any{
 				"host":   c.Request.Host,
 				"method": c.Request.Method,
 				"proto":  c.Request.Proto,
 				"path":   c.Request.URL.Path,
 				"ip":     c.ClientIP(),
+				"get":    c.Request.URL.Query(),
+				"post":   string(b),
 			},
 		})
 		return
