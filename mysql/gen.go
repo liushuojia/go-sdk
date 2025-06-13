@@ -75,17 +75,17 @@ func Build(username, password, host string, port int, db, out string) {
 	})
 	g.UseDB(gormDB) // reuse your gorm db
 
-	// 自定义字段的数据类型
-	// 统一数字类型为int64,兼容protobuf
-	dataMap := map[string]func(detailType gorm.ColumnType) (dataType string){
+	// 要先于`ApplyBasic`执行
+	g.WithDataTypeMap(map[string]func(detailType gorm.ColumnType) (dataType string){
 		"tinyint":   func(detailType gorm.ColumnType) (dataType string) { return "int64" },
 		"smallint":  func(detailType gorm.ColumnType) (dataType string) { return "int64" },
 		"mediumint": func(detailType gorm.ColumnType) (dataType string) { return "int64" },
 		"bigint":    func(detailType gorm.ColumnType) (dataType string) { return "int64" },
 		"int":       func(detailType gorm.ColumnType) (dataType string) { return "int64" },
-	}
-	// 要先于`ApplyBasic`执行
-	g.WithDataTypeMap(dataMap)
+		"decimal": func(columnType gorm.ColumnType) string {
+			return "decimal.Decimal"
+		},
+	})
 
 	var allModel []interface{}
 	tables, _ := gormDB.Migrator().GetTables()
